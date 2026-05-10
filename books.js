@@ -1,8 +1,11 @@
 // ============================================================
 //  books.js — 书目数据
-//  如何添加新书：在对应的数组里复制一行，改掉内容即可
-//  pages 字段：每个字符串对应书里的一页文字
-//  pages 留空数组 [] 表示还没录入文字（仍可完成任务，只是无法打分）
+//
+//  新增字段说明：
+//  pdfPath: PDF文件路径，放在 books/ 文件夹下
+//           例如：pdfPath: "books/clownface.pdf"
+//  pages:   每页文字，用于语音打分对比
+//           有PDF的话页面会直接显示PDF图文
 // ============================================================
 
 const BOOKS_DATA = [
@@ -11,8 +14,9 @@ const BOOKS_DATA = [
   {
     id: "rf00", series: "RAZ", level: "F",
     title: "A Clown Face",
-    note: "face paint, sequence, clown",
+    note: "face paint, sequence",
     url: "https://www.readinga-z.com",
+    pdfPath: "books/clownface.pdf",
     pages: [
       "How does a clown put on a face? Where does she start?",
       "First, she puts on white face paint. What comes next?",
@@ -31,6 +35,7 @@ const BOOKS_DATA = [
     title: "Henry and Mudge",
     note: "pets, friendship",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -38,6 +43,7 @@ const BOOKS_DATA = [
     title: "The Big Storm",
     note: "weather, safety",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -45,6 +51,7 @@ const BOOKS_DATA = [
     title: "Animal Babies in Grasslands",
     note: "nonfiction, animals",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -52,6 +59,7 @@ const BOOKS_DATA = [
     title: "Making Soup",
     note: "cooking, sequence",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -59,6 +67,7 @@ const BOOKS_DATA = [
     title: "Families",
     note: "nonfiction, social",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
 
@@ -68,6 +77,7 @@ const BOOKS_DATA = [
     title: "Dogs at Work",
     note: "jobs, dogs",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -75,6 +85,7 @@ const BOOKS_DATA = [
     title: "Trucks",
     note: "nonfiction, vehicles",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -82,6 +93,7 @@ const BOOKS_DATA = [
     title: "The Enormous Watermelon",
     note: "repetition, humor",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -89,6 +101,7 @@ const BOOKS_DATA = [
     title: "Frogs",
     note: "life cycle, science",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -96,6 +109,7 @@ const BOOKS_DATA = [
     title: "Mouse Soup",
     note: "story within story",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
 
@@ -105,6 +119,7 @@ const BOOKS_DATA = [
     title: "Where Do Birds Live?",
     note: "habitats, birds",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -112,6 +127,7 @@ const BOOKS_DATA = [
     title: "Night Animals",
     note: "nocturnal, nonfiction",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -119,6 +135,7 @@ const BOOKS_DATA = [
     title: "The Ugly Duckling",
     note: "classic tale",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -126,6 +143,7 @@ const BOOKS_DATA = [
     title: "Bugs! Bugs! Bugs!",
     note: "insects, science",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
   {
@@ -133,67 +151,48 @@ const BOOKS_DATA = [
     title: "My Robot",
     note: "imagination, fiction",
     url: "https://www.readinga-z.com",
+    pdfPath: "",
     pages: []
   },
 
-  // ──────────────── 牛津树 Level F/G ────────────────
+  // ──────────────── 牛津树 ────────────────
   {
     id: "of01", series: "牛津树", level: "F",
     title: "Gran",
     note: "family, grandparents",
-    url: "",
-    pages: []
+    url: "", pdfPath: "", pages: []
   },
   {
     id: "of02", series: "牛津树", level: "F",
     title: "The Dragon Tree",
     note: "fantasy, adventure",
-    url: "",
-    pages: []
+    url: "", pdfPath: "", pages: []
   },
   {
     id: "og01", series: "牛津树", level: "G",
     title: "Pirate Adventure",
     note: "adventure, pirates",
-    url: "",
-    pages: []
+    url: "", pdfPath: "", pages: []
   },
   {
     id: "og02", series: "牛津树", level: "G",
     title: "Castle Adventure",
     note: "adventure, history",
-    url: "",
-    pages: []
-  },
-  {
-    id: "oh01", series: "牛津树", level: "H",
-    title: "Robin Hood",
-    note: "classic story",
-    url: "",
-    pages: []
+    url: "", pdfPath: "", pages: []
   },
 
-  // ──────────────── 红火箭 Level F/G ────────────────
+  // ──────────────── 红火箭 ────────────────
   {
     id: "rrf01", series: "红火箭", level: "F",
     title: "Going to School",
     note: "daily life",
-    url: "",
-    pages: []
+    url: "", pdfPath: "", pages: []
   },
   {
     id: "rrf02", series: "红火箭", level: "F",
     title: "The Bike Ride",
     note: "outdoor, family",
-    url: "",
-    pages: []
-  },
-  {
-    id: "rrg01", series: "红火箭", level: "G",
-    title: "At the Supermarket",
-    note: "shopping, community",
-    url: "",
-    pages: []
+    url: "", pdfPath: "", pages: []
   },
 
 ];
