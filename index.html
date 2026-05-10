@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="英语阅读">
 <title>英语阅读 📚</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -23,12 +22,10 @@
   --safe-bottom:env(safe-area-inset-bottom,0px);
 }
 html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--font);color:var(--text1)}
-
-/* ── SCREENS ── */
 .screen{position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden}
 .screen.active{display:flex}
 
-/* ── HOME SCREEN ── */
+/* HOME */
 #home{background:linear-gradient(160deg,#EEF2FF 0%,#F5F3FF 50%,#FFF7ED 100%)}
 .home-header{padding:48px 28px 20px;text-align:center}
 .home-avatar{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary2));display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 16px;box-shadow:0 8px 24px rgba(108,99,255,.3)}
@@ -41,7 +38,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--fon
 .ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .ring-num{font-size:28px;font-weight:900;color:var(--primary)}
 .ring-sub{font-size:11px;font-weight:700;color:var(--text2)}
-
 .home-scroll{flex:1;overflow-y:auto;padding:0 20px 120px}
 .section-label{font-size:13px;font-weight:800;color:var(--text2);letter-spacing:.5px;margin:16px 0 10px;text-transform:uppercase}
 .task-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;box-shadow:0 2px 12px rgba(0,0,0,.06);display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;border:2px solid transparent}
@@ -49,26 +45,20 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--fon
 .task-card.done{border-color:var(--green);opacity:.75}
 .task-card.done .task-card-title{text-decoration:line-through;color:var(--text2)}
 .task-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.icon-new{background:var(--primary-bg)}
-.icon-rev{background:var(--amber-bg)}
-.icon-done{background:var(--green-bg)}
+.icon-new{background:var(--primary-bg)}.icon-rev{background:var(--amber-bg)}.icon-done{background:var(--green-bg)}
 .task-card-info{flex:1;min-width:0}
 .task-card-title{font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .task-card-meta{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
 .pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;display:inline-block}
-.pill-raz{background:#DBEAFE;color:#1D4ED8}
-.pill-ox{background:#DCFCE7;color:#166534}
-.pill-rr{background:#FEE2E2;color:#991B1B}
-.pill-rev{background:var(--amber-bg);color:#92400E}
-.pill-new{background:var(--primary-bg);color:#4338CA}
-.pill-carry{background:#FFE4E6;color:#9F1239}
+.pill-raz{background:#DBEAFE;color:#1D4ED8}.pill-ox{background:#DCFCE7;color:#166534}
+.pill-rr{background:#FEE2E2;color:#991B1B}.pill-rev{background:var(--amber-bg);color:#92400E}
+.pill-new{background:var(--primary-bg);color:#4338CA}.pill-carry{background:#FFE4E6;color:#9F1239}
 .pill-lv{background:#F3F4F6;color:#374151}
 .task-score-badge{font-size:18px;font-weight:900;color:var(--green)}
 .task-checks{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
 .mini-check{width:28px;height:28px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .15s;background:var(--bg)}
 .mini-check.on{background:var(--green);border-color:var(--green);color:#fff}
 .mini-check-lbl{font-size:9px;font-weight:800;color:var(--text3);text-align:center;margin-top:1px}
-
 .fab{position:fixed;bottom:calc(28px + var(--safe-bottom));left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border:none;border-radius:30px;padding:16px 36px;font-size:17px;font-weight:800;font-family:var(--font);cursor:pointer;box-shadow:0 8px 24px rgba(108,99,255,.4);display:flex;align-items:center;gap:8px;white-space:nowrap}
 .fab:active{transform:translateX(-50%) scale(.96)}
 .empty-state{text-align:center;padding:48px 20px;color:var(--text2)}
@@ -76,44 +66,49 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--fon
 .empty-state p{font-size:16px;font-weight:700}
 .empty-state small{font-size:13px;color:var(--text3)}
 
-/* ── READING SCREEN ── */
+/* READING SCREEN */
 #reading{background:#1A1A2E}
-.reading-header{padding:52px 20px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.reading-header{padding:52px 20px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0}
 .back-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .r-title{font-size:17px;font-weight:800;color:#fff;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .r-page-ind{font-size:13px;color:rgba(255,255,255,.5);font-weight:700;flex-shrink:0}
 
-.page-display{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:0 20px;gap:12px}
-.page-text-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:24px;flex:1;overflow-y:auto;display:flex;align-items:center;justify-content:center}
-.page-text-inner{font-size:26px;font-weight:700;color:#fff;line-height:1.7;text-align:center}
-.word{display:inline;padding:0 1px;border-radius:4px;transition:background .2s}
-.word.hit{background:rgba(34,194,122,.3);color:#6EE7B7}
-.word.miss{background:rgba(239,68,68,.2)}
-.no-text{font-size:16px;color:rgba(255,255,255,.3);font-weight:600}
+/* PDF PAGE DISPLAY */
+.page-display{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:0 16px 8px;gap:10px;min-height:0}
+.pdf-canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden;border-radius:var(--radius-sm)}
+#pdf-canvas{max-width:100%;max-height:100%;border-radius:var(--radius-sm);display:block;object-fit:contain}
+.pdf-loading{color:rgba(255,255,255,.4);font-size:14px;font-weight:700;text-align:center;padding:40px}
 
-.voice-area{background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.08);padding:16px 20px;flex-shrink:0}
-.voice-row{display:flex;align-items:center;gap:14px}
-.mic-btn{width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+/* TEXT OVERLAY (when no PDF) */
+.page-text-card{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:24px;overflow-y:auto;display:flex;align-items:center;justify-content:center}
+.page-text-inner{font-size:24px;font-weight:700;color:#fff;line-height:1.7;text-align:center}
+.word{display:inline;padding:0 1px;border-radius:4px;transition:background .2s}
+.word.hit{background:rgba(34,194,122,.35);color:#6EE7B7}
+
+/* VOICE */
+.voice-area{background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.08);padding:12px 16px;flex-shrink:0}
+.voice-row{display:flex;align-items:center;gap:12px}
+.mic-btn{width:58px;height:58px;border-radius:50%;border:none;cursor:pointer;font-size:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
 .mic-btn.idle{background:var(--primary);box-shadow:0 6px 20px rgba(108,99,255,.5)}
-.mic-btn.rec{background:var(--red);animation:pulse-red 1s infinite;box-shadow:0 6px 20px rgba(239,68,68,.5)}
+.mic-btn.rec{background:var(--red);animation:pulse-red 1s infinite}
 @keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}50%{box-shadow:0 0 0 14px rgba(239,68,68,0)}}
 .voice-info{flex:1;min-width:0}
-.voice-status{font-size:14px;font-weight:700;color:rgba(255,255,255,.8)}
-.voice-transcript{font-size:12px;color:rgba(255,255,255,.4);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.voice-status{font-size:13px;font-weight:700;color:rgba(255,255,255,.8)}
+.voice-transcript{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .score-display{text-align:center;flex-shrink:0}
-.score-num{font-size:36px;font-weight:900;color:var(--green);line-height:1}
-.score-lbl{font-size:11px;color:rgba(255,255,255,.4);font-weight:700;margin-top:2px}
+.score-num{font-size:34px;font-weight:900;color:var(--green);line-height:1}
+.score-lbl{font-size:10px;color:rgba(255,255,255,.4);font-weight:700;margin-top:1px}
 
-.reading-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 20px calc(12px + var(--safe-bottom));background:rgba(0,0,0,.3);flex-shrink:0}
-.page-nav-btn{padding:14px 28px;border-radius:var(--radius-sm);border:none;font-family:var(--font);font-size:15px;font-weight:800;cursor:pointer;transition:all .15s}
+.reading-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 16px calc(10px + var(--safe-bottom));background:rgba(0,0,0,.3);flex-shrink:0}
+.page-nav-btn{padding:13px 26px;border-radius:var(--radius-sm);border:none;font-family:var(--font);font-size:15px;font-weight:800;cursor:pointer;transition:all .15s}
 .page-nav-btn:active{transform:scale(.96)}
 .page-nav-prev{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
 .page-nav-next{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(108,99,255,.4)}
 .session-avg{font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-align:center}
 
-/* ── FINISH SCREEN ── */
+/* FINISH */
 #finish{background:linear-gradient(160deg,#EEF2FF,#F5F3FF)}
-.finish-inner{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center}
+.finish-inner{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;overflow-y:auto}
 .finish-trophy{font-size:80px;margin-bottom:20px;animation:bounce .6s .2s both}
 @keyframes bounce{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
 .finish-title{font-size:30px;font-weight:900;color:var(--primary);margin-bottom:8px}
@@ -122,16 +117,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--fon
 .score-box{background:var(--card);border-radius:var(--radius-sm);padding:16px 8px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
 .score-box-num{font-size:28px;font-weight:900;color:var(--primary)}
 .score-box-lbl{font-size:12px;font-weight:700;color:var(--text2);margin-top:4px}
-.page-scores-list{background:var(--card);border-radius:var(--radius-sm);padding:16px;width:100%;margin-bottom:24px;text-align:left}
+.page-scores-list{background:var(--card);border-radius:var(--radius-sm);padding:16px;width:100%;margin-bottom:24px;text-align:left;max-height:200px;overflow-y:auto}
 .page-score-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:15px;font-weight:700}
 .page-score-row:last-child{border:none}
-.btn-done{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border:none;border-radius:var(--radius);padding:18px 48px;font-size:18px;font-weight:800;font-family:var(--font);cursor:pointer;box-shadow:0 8px 24px rgba(108,99,255,.35);margin-top:8px}
+.btn-done{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border:none;border-radius:var(--radius);padding:18px 48px;font-size:18px;font-weight:800;font-family:var(--font);cursor:pointer;box-shadow:0 8px 24px rgba(108,99,255,.35)}
 .btn-done:active{transform:scale(.97)}
 </style>
 </head>
 <body>
 
-<!-- ════════════════ HOME ════════════════ -->
+<!-- HOME -->
 <div class="screen active" id="home">
   <div class="home-header">
     <div class="home-avatar">📚</div>
@@ -140,8 +135,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--fon
     <div class="progress-ring-wrap">
       <svg width="120" height="120" viewBox="0 0 120 120">
         <circle class="ring-bg" cx="60" cy="60" r="50"/>
-        <circle class="ring-fill" id="ring" cx="60" cy="60" r="50"
-          stroke-dasharray="314" stroke-dashoffset="314"/>
+        <circle class="ring-fill" id="ring" cx="60" cy="60" r="50" stroke-dasharray="314" stroke-dashoffset="314"/>
       </svg>
       <div class="ring-label">
         <div class="ring-num" id="ring-num">0/0</div>
@@ -149,17 +143,13 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--fon
       </div>
     </div>
   </div>
-
   <div class="home-scroll" id="home-scroll">
     <div id="task-container"></div>
   </div>
-
-  <button class="fab" id="gen-btn" onclick="generateTasks()">
-    ✨ 生成今日任务
-  </button>
+  <button class="fab" onclick="generateTasks()">✨ 生成今日任务</button>
 </div>
 
-<!-- ════════════════ READING ════════════════ -->
+<!-- READING -->
 <div class="screen" id="reading">
   <div class="reading-header">
     <button class="back-btn" onclick="exitReading()">←</button>
@@ -167,10 +157,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--fon
     <div class="r-page-ind" id="r-page-ind">1 / 1</div>
   </div>
 
-  <div class="page-display">
-    <div class="page-text-card">
+  <div class="page-display" id="page-display">
+    <!-- PDF mode -->
+    <div class="pdf-canvas-wrap" id="pdf-wrap" style="display:none">
+      <canvas id="pdf-canvas"></canvas>
+    </div>
+    <!-- Text-only mode -->
+    <div class="page-text-card" id="text-wrap" style="display:none">
       <div class="page-text-inner" id="r-text"></div>
     </div>
+    <div class="pdf-loading" id="pdf-loading">📖 加载中…</div>
   </div>
 
   <div class="voice-area">
@@ -194,7 +190,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--fon
   </div>
 </div>
 
-<!-- ════════════════ FINISH ════════════════ -->
+<!-- FINISH -->
 <div class="screen" id="finish">
   <div class="finish-inner">
     <div class="finish-trophy" id="finish-trophy">🏆</div>
@@ -210,401 +206,350 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--fon
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="books.js"></script>
 <script>
-// ─── STORAGE HELPERS ───
-const SK = {
-  tasks: 'ra_tasks_v4',
-  state: 'ra_state_v4',
-  history: 'ra_hist_v4'
-};
-function ls(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } }
-function lss(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// ─── STATE ───
-let tasks = ls(SK.tasks) || [];
-let state = ls(SK.state) || { streak: 0, total: 0, lastDate: '' };
-let history = ls(SK.history) || [];
+// ── STORAGE ──
+function ls(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}}
+function lss(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+const SK={tasks:'ra_tasks_v4',state:'ra_state_v4',hist:'ra_hist_v4'};
+
+let tasks=ls(SK.tasks)||[];
+let state=ls(SK.state)||{streak:0,total:0,lastDate:''};
+let history=ls(SK.hist)||[];
 
 // reading session
-let RS = { taskId: null, pages: [], cur: 0, pageScores: [], rec: null, isRec: false, finalText: '' };
+let RS={taskId:null,pdfDoc:null,totalPages:0,cur:0,pageTexts:[],pageScores:[],rec:null,isRec:false,finalText:''};
 
-// ─── DATE ───
-function today() { return new Date().toISOString().slice(0, 10); }
-function todayLabel() {
-  const d = new Date();
-  const days = ['日','一','二','三','四','五','六'];
-  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · 周${days[d.getDay()]}`;
-}
+// ── DATE ──
+function today(){return new Date().toISOString().slice(0,10);}
 
-// ─── INIT ───
-function init() {
-  document.getElementById('today-label').textContent = todayLabel();
-  const h = new Date().getHours();
-  const g = h < 12 ? '早上好！' : h < 18 ? '下午好！' : '晚上好！';
-  document.getElementById('greeting').textContent = g + ' 一起读书吧 📖';
+// ── INIT ──
+function init(){
+  const d=new Date();
+  document.getElementById('today-label').textContent=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · 周${'日一二三四五六'[d.getDay()]}`;
+  const h=d.getHours();
+  document.getElementById('greeting').textContent=(h<12?'早上好！':h<18?'下午好！':'晚上好！')+' 一起读书吧 📖';
   renderHome();
 }
 
-// ─── GENERATE TASKS ───
-function generateTasks() {
-  const td = today();
-  const existing = tasks.filter(t => t.date === td);
-  if (existing.length > 0 && !confirm('今天已有任务，重新生成？')) return;
-  tasks = tasks.filter(t => t.date !== td);
+// ── GENERATE TASKS ──
+function generateTasks(){
+  const td=today();
+  if(tasks.filter(t=>t.date===td).length>0&&!confirm('今天已有任务，重新生成？'))return;
+  tasks=tasks.filter(t=>t.date!==td);
 
-  // carry over unfinished
-  const carry = tasks.filter(t => t.date < td && !t.readDone);
-  carry.forEach(t => { t.date = td; t.isCarry = true; });
-  tasks = tasks.filter(t => !(t.date < td && !t.readDone));
+  const carry=tasks.filter(t=>t.date<td&&!t.readDone);
+  carry.forEach(t=>{t.date=td;t.isCarry=true;});
+  tasks=tasks.filter(t=>!(t.date<td&&!t.readDone));
   tasks.push(...carry);
 
-  // review: yesterday's finished books
-  const yest = new Date(); yest.setDate(yest.getDate() - 1);
-  const yd = yest.toISOString().slice(0, 10);
-  const yFinished = tasks.filter(t => t.date === yd && t.readDone).map(t => t.bookId);
-  const revs = yFinished.map((bid, i) => {
-    const b = BOOKS_DATA.find(x => x.id === bid);
-    if (!b) return null;
-    return mkTask(b, td, true, false, 'rv_' + td + '_' + i);
+  const yest=new Date();yest.setDate(yest.getDate()-1);
+  const yd=yest.toISOString().slice(0,10);
+  const yids=tasks.filter(t=>t.date===yd&&t.readDone).map(t=>t.bookId);
+  const revs=yids.map((bid,i)=>{
+    const b=BOOKS_DATA.find(x=>x.id===bid);if(!b)return null;
+    return mkTask(b,td,true,false,'rv_'+td+'_'+i);
   }).filter(Boolean);
 
-  // new books
-  const used = new Set([...carry.map(t => t.bookId), ...revs.map(t => t.bookId)]);
-  const need = Math.max(0, 5 - revs.length - carry.length);
-  const pool = BOOKS_DATA.filter(b => !used.has(b.id)).sort(() => Math.random() - .5).slice(0, need);
-  const news = pool.map((b, i) => mkTask(b, td, false, false, 'nw_' + td + '_' + i));
+  const used=new Set([...carry.map(t=>t.bookId),...revs.map(t=>t.bookId)]);
+  const need=Math.max(0,5-revs.length-carry.length);
+  const pool=BOOKS_DATA.filter(b=>!used.has(b.id)).sort(()=>Math.random()-.5).slice(0,need);
+  const news=pool.map((b,i)=>mkTask(b,td,false,false,'nw_'+td+'_'+i));
 
-  tasks.push(...revs, ...news);
-  lss(SK.tasks, tasks);
+  tasks.push(...revs,...news);
+  lss(SK.tasks,tasks);
   renderHome();
 }
 
-function mkTask(b, date, isRev, isCarry, id) {
-  return {
-    id, date, bookId: b.id, title: b.title, series: b.series, level: b.level,
-    url: b.url, pages: b.pages || [],
-    isReview: isRev, isCarry,
-    readDone: false, recDone: false, quizDone: false,
-    scores: [], avgScore: null
-  };
+function mkTask(b,date,isRev,isCarry,id){
+  return{id,date,bookId:b.id,title:b.title,series:b.series,level:b.level,
+    url:b.url,pdfPath:b.pdfPath||'',pages:b.pages||[],
+    isReview:isRev,isCarry,readDone:false,recDone:false,quizDone:false,scores:[],avgScore:null};
 }
 
-// ─── RENDER HOME ───
-function renderHome() {
-  const td = today();
-  const tt = tasks.filter(t => t.date === td);
-  const done = tt.filter(t => t.readDone).length;
-  const total = tt.length;
+// ── RENDER HOME ──
+function renderHome(){
+  const td=today();
+  const tt=tasks.filter(t=>t.date===td);
+  const done=tt.filter(t=>t.readDone).length;
+  const total=tt.length;
+  const pct=total?done/total:0;
+  document.getElementById('ring').style.strokeDashoffset=314-314*pct;
+  document.getElementById('ring-num').textContent=done+'/'+total;
 
-  // ring
-  const pct = total ? done / total : 0;
-  const circ = 314;
-  document.getElementById('ring').style.strokeDashoffset = circ - circ * pct;
-  document.getElementById('ring-num').textContent = done + '/' + total;
-
-  const cont = document.getElementById('task-container');
-  if (!tt.length) {
-    cont.innerHTML = `<div class="empty-state"><div class="e-icon">✨</div><p>今天还没有任务</p><small>点下方按钮生成今日任务</small></div>`;
+  const cont=document.getElementById('task-container');
+  if(!tt.length){
+    cont.innerHTML=`<div class="empty-state"><div class="e-icon">✨</div><p>今天还没有任务</p><small>点下方按钮生成今日任务</small></div>`;
     return;
   }
-
-  const carry = tt.filter(t => t.isCarry);
-  const revs = tt.filter(t => t.isReview && !t.isCarry);
-  const news = tt.filter(t => !t.isReview && !t.isCarry);
-
-  let html = '';
-  if (carry.length) { html += `<div class="section-label">⏩ 顺延任务</div>` + carry.map(taskHTML).join(''); }
-  if (revs.length) { html += `<div class="section-label">📖 复习（读1遍）</div>` + revs.map(taskHTML).join(''); }
-  if (news.length) { html += `<div class="section-label">✨ 新书（读2遍+录音）</div>` + news.map(taskHTML).join(''); }
-  cont.innerHTML = html;
+  const carry=tt.filter(t=>t.isCarry);
+  const revs=tt.filter(t=>t.isReview&&!t.isCarry);
+  const news=tt.filter(t=>!t.isReview&&!t.isCarry);
+  let html='';
+  if(carry.length)html+=`<div class="section-label">⏩ 顺延任务</div>`+carry.map(taskHTML).join('');
+  if(revs.length)html+=`<div class="section-label">📖 复习（读1遍）</div>`+revs.map(taskHTML).join('');
+  if(news.length)html+=`<div class="section-label">✨ 新书（读2遍+录音）</div>`+news.map(taskHTML).join('');
+  cont.innerHTML=html;
 }
 
-function taskHTML(t) {
-  const seriesPill = { RAZ: 'pill-raz', '牛津树': 'pill-ox', '红火箭': 'pill-rr' }[t.series] || '';
-  const iconClass = t.readDone ? 'icon-done' : t.isReview ? 'icon-rev' : 'icon-new';
-  const iconEmoji = t.readDone ? '✅' : t.isReview ? '🔄' : '📗';
-  const scoreBadge = t.avgScore !== null
-    ? `<span class="task-score-badge">${t.avgScore}</span>`
-    : '';
+function taskHTML(t){
+  const sp={RAZ:'pill-raz','牛津树':'pill-ox','红火箭':'pill-rr'}[t.series]||'';
+  const iconClass=t.readDone?'icon-done':t.isReview?'icon-rev':'icon-new';
+  const iconEmoji=t.readDone?'✅':t.isReview?'🔄':'📗';
+  const hasPdf=t.pdfPath?'📄 ':'';
   return `
-  <div class="task-card ${t.readDone ? 'done' : ''}" onclick="openReading('${t.id}')">
+  <div class="task-card ${t.readDone?'done':''}" onclick="openReading('${t.id}')">
     <div class="task-icon ${iconClass}">${iconEmoji}</div>
     <div class="task-card-info">
-      <div class="task-card-title">${t.title}</div>
+      <div class="task-card-title">${hasPdf}${t.title}</div>
       <div class="task-card-meta">
-        <span class="pill ${seriesPill}">${t.series}</span>
+        <span class="pill ${sp}">${t.series}</span>
         <span class="pill pill-lv">Level ${t.level}</span>
-        ${t.isReview ? '<span class="pill pill-rev">复习</span>' : ''}
-        ${t.isCarry ? '<span class="pill pill-carry">顺延</span>' : ''}
-        ${!t.isReview && !t.isCarry ? '<span class="pill pill-new">新书</span>' : ''}
-        ${scoreBadge}
+        ${t.isReview?'<span class="pill pill-rev">复习</span>':''}
+        ${t.isCarry?'<span class="pill pill-carry">顺延</span>':''}
+        ${!t.isReview&&!t.isCarry?'<span class="pill pill-new">新书</span>':''}
+        ${t.avgScore!==null?`<span class="task-score-badge">${t.avgScore}</span>`:''}
       </div>
     </div>
     <div class="task-checks" onclick="event.stopPropagation()">
-      <div>
-        <div class="mini-check ${t.readDone?'on':''}" onclick="toggleCheck('${t.id}','readDone')">
-          ${t.readDone ? '✓' : ''}
-        </div>
-        <div class="mini-check-lbl">读</div>
-      </div>
-      <div>
-        <div class="mini-check ${t.recDone?'on':''}" onclick="toggleCheck('${t.id}','recDone')">
-          ${t.recDone ? '✓' : ''}
-        </div>
-        <div class="mini-check-lbl">录</div>
-      </div>
-      <div>
-        <div class="mini-check ${t.quizDone?'on':''}" onclick="toggleCheck('${t.id}','quizDone')">
-          ${t.quizDone ? '✓' : ''}
-        </div>
-        <div class="mini-check-lbl">题</div>
-      </div>
+      <div><div class="mini-check ${t.readDone?'on':''}" onclick="toggleCheck('${t.id}','readDone')">${t.readDone?'✓':''}</div><div class="mini-check-lbl">读</div></div>
+      <div><div class="mini-check ${t.recDone?'on':''}" onclick="toggleCheck('${t.id}','recDone')">${t.recDone?'✓':''}</div><div class="mini-check-lbl">录</div></div>
+      <div><div class="mini-check ${t.quizDone?'on':''}" onclick="toggleCheck('${t.id}','quizDone')">${t.quizDone?'✓':''}</div><div class="mini-check-lbl">题</div></div>
     </div>
   </div>`;
 }
 
-function toggleCheck(id, field) {
-  const t = tasks.find(x => x.id === id);
-  if (!t) return;
-  t[field] = !t[field];
-  if (field === 'readDone' && t[field]) {
-    state.total++;
-    bumpStreak();
-  }
-  lss(SK.tasks, tasks);
-  lss(SK.state, state);
+function toggleCheck(id,field){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  t[field]=!t[field];
+  if(field==='readDone'&&t[field]){state.total++;bumpStreak();}
+  lss(SK.tasks,tasks);lss(SK.state,state);
   renderHome();
 }
 
-function bumpStreak() {
-  const td = today();
-  if (state.lastDate === td) return;
-  const yest = new Date(); yest.setDate(yest.getDate() - 1);
-  const yd = yest.toISOString().slice(0, 10);
-  state.streak = state.lastDate === yd ? state.streak + 1 : 1;
-  state.lastDate = td;
+function bumpStreak(){
+  const td=today();if(state.lastDate===td)return;
+  const yest=new Date();yest.setDate(yest.getDate()-1);
+  state.streak=state.lastDate===yest.toISOString().slice(0,10)?state.streak+1:1;
+  state.lastDate=td;
 }
 
-// ─── READING MODE ───
-function openReading(tid) {
-  const t = tasks.find(x => x.id === tid);
-  if (!t) return;
+// ── READING MODE ──
+async function openReading(tid){
+  const t=tasks.find(x=>x.id===tid);if(!t)return;
+  const bookDef=BOOKS_DATA.find(b=>b.id===t.bookId)||{};
+  const pdfPath=bookDef.pdfPath||t.pdfPath||'';
+  const pageTexts=bookDef.pages&&bookDef.pages.length?bookDef.pages:(t.pages||[]);
 
-  // merge latest pages from BOOKS_DATA (in case books.js was updated)
-  const bookDef = BOOKS_DATA.find(b => b.id === t.bookId);
-  const pages = (bookDef && bookDef.pages && bookDef.pages.length)
-    ? bookDef.pages
-    : (t.pages && t.pages.length ? t.pages : []);
+  RS={taskId:tid,pdfDoc:null,totalPages:0,cur:0,pageTexts,pageScores:[],rec:null,isRec:false,finalText:''};
 
-  RS = {
-    taskId: tid,
-    pages: pages.length ? pages : ['（暂无页面文字）\n\n请在家长端为此书添加每页内容，\n然后刷新页面。'],
-    cur: 0, pageScores: [], rec: null, isRec: false, finalText: ''
-  };
-
-  document.getElementById('r-title').textContent = t.title;
+  document.getElementById('r-title').textContent=t.title;
   showScreen('reading');
-  renderReadingPage();
+
+  // show loading
+  document.getElementById('pdf-loading').style.display='block';
+  document.getElementById('pdf-wrap').style.display='none';
+  document.getElementById('text-wrap').style.display='none';
+
+  if(pdfPath){
+    try{
+      const pdf=await pdfjsLib.getDocument(pdfPath).promise;
+      RS.pdfDoc=pdf;
+      // skip cover pages (first 2) and back matter (last 2), show content pages
+      // PDF pages: 1=cover, 2=credits, 3..N-2=content, N-1,N=back matter
+      const total=pdf.numPages;
+      // content starts at page 3, ends at total-2
+      const startPage=3;
+      const endPage=Math.max(startPage,total-2);
+      RS.pdfStartPage=startPage;
+      RS.totalPages=endPage-startPage+1;
+      RS.cur=0;
+      document.getElementById('pdf-loading').style.display='none';
+      document.getElementById('pdf-wrap').style.display='flex';
+      await renderPDFPage();
+    }catch(e){
+      console.error(e);
+      RS.pdfDoc=null;
+      RS.totalPages=pageTexts.length||1;
+      document.getElementById('pdf-loading').style.display='none';
+      document.getElementById('text-wrap').style.display='flex';
+      renderTextPage();
+    }
+  }else{
+    RS.totalPages=pageTexts.length||1;
+    document.getElementById('pdf-loading').style.display='none';
+    document.getElementById('text-wrap').style.display='flex';
+    renderTextPage();
+  }
+
+  updatePageNav();
 }
 
-function renderReadingPage() {
-  const { pages, cur } = RS;
-  const text = pages[cur] || '';
-  document.getElementById('r-page-ind').textContent = (cur + 1) + ' / ' + pages.length;
+async function renderPDFPage(){
+  if(!RS.pdfDoc)return;
+  const pageNum=RS.pdfStartPage+RS.cur;
+  try{
+    const page=await RS.pdfDoc.getPage(pageNum);
+    const canvas=document.getElementById('pdf-canvas');
+    const wrap=document.getElementById('pdf-wrap');
+    const maxW=wrap.clientWidth||500;
+    const maxH=wrap.clientHeight||500;
+    const vp0=page.getViewport({scale:1});
+    const scale=Math.min(maxW/vp0.width,maxH/vp0.height)*0.97;
+    const vp=page.getViewport({scale});
+    canvas.width=vp.width;
+    canvas.height=vp.height;
+    await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+  }catch(e){console.error('render page error',e);}
+}
 
-  // render words
-  const words = text.split(/\s+/).filter(Boolean);
-  document.getElementById('r-text').innerHTML = words.length
-    ? words.map((w, i) => `<span class="word" id="w${i}" data-word="${w.toLowerCase().replace(/[^a-z']/g,'')}">${w} </span>`).join('')
-    : `<span class="no-text">无文字内容</span>`;
+function renderTextPage(){
+  const text=RS.pageTexts[RS.cur]||'';
+  const words=text.split(/\s+/).filter(Boolean);
+  document.getElementById('r-text').innerHTML=words.length
+    ?words.map((w,i)=>`<span class="word" id="w${i}" data-word="${w.toLowerCase().replace(/[^a-z']/g,'')}">${w} </span>`).join('')
+    :`<span style="color:rgba(255,255,255,.3);font-size:16px">暂无文字内容</span>`;
+}
 
-  document.getElementById('v-status').textContent = '点麦克风开始朗读';
-  document.getElementById('v-transcript').textContent = ' ';
-  document.getElementById('score-display').style.display = 'none';
-  document.getElementById('prev-btn').style.opacity = cur === 0 ? '0.3' : '1';
-  document.getElementById('next-btn').textContent = cur === pages.length - 1 ? '完成 ✓' : '下一页 →';
+function updatePageNav(){
+  document.getElementById('r-page-ind').textContent=(RS.cur+1)+' / '+RS.totalPages;
+  document.getElementById('prev-btn').style.opacity=RS.cur===0?'0.3':'1';
+  document.getElementById('next-btn').textContent=RS.cur===RS.totalPages-1?'完成 ✓':'下一页 →';
+  document.getElementById('v-status').textContent='点麦克风开始朗读';
+  document.getElementById('v-transcript').textContent=' ';
+  document.getElementById('score-display').style.display='none';
   stopMic();
   updateAvg();
 }
 
-function prevPage() { if (RS.cur > 0) { RS.cur--; renderReadingPage(); } }
+async function prevPage(){
+  if(RS.cur>0){
+    RS.cur--;
+    if(RS.pdfDoc)await renderPDFPage();
+    else renderTextPage();
+    updatePageNav();
+  }
+}
 
-function nextPage() {
-  if (RS.cur < RS.pages.length - 1) {
+async function nextPage(){
+  if(RS.cur<RS.totalPages-1){
     RS.cur++;
-    renderReadingPage();
-  } else {
+    if(RS.pdfDoc)await renderPDFPage();
+    else renderTextPage();
+    updatePageNav();
+  }else{
     finishReading();
   }
 }
 
-function exitReading() {
-  stopMic();
-  saveScores();
-  showScreen('home');
-  renderHome();
+function exitReading(){stopMic();saveScores();showScreen('home');renderHome();}
+
+function saveScores(){
+  if(!RS.taskId||!RS.pageScores.length)return;
+  const t=tasks.find(x=>x.id===RS.taskId);if(!t)return;
+  t.scores=RS.pageScores;
+  const valid=RS.pageScores.filter(s=>s>0);
+  t.avgScore=valid.length?Math.round(valid.reduce((a,b)=>a+b,0)/valid.length*10)/10:null;
+  lss(SK.tasks,tasks);
 }
 
-function saveScores() {
-  if (!RS.taskId || !RS.pageScores.length) return;
-  const t = tasks.find(x => x.id === RS.taskId);
-  if (!t) return;
-  t.scores = RS.pageScores;
-  const valid = RS.pageScores.filter(s => s > 0);
-  t.avgScore = valid.length
-    ? Math.round(valid.reduce((a, b) => a + b, 0) / valid.length * 10) / 10
-    : null;
-  lss(SK.tasks, tasks);
-}
-
-function finishReading() {
-  stopMic();
-  saveScores();
-  const t = tasks.find(x => x.id === RS.taskId);
-  if (t) {
-    // auto-mark read done
-    if (!t.readDone) {
-      t.readDone = true;
-      state.total++;
-      bumpStreak();
-      lss(SK.tasks, tasks);
-      lss(SK.state, state);
-    }
-    // history
-    if (t.avgScore !== null) {
-      history.unshift({
-        date: today(), title: t.title,
-        scores: t.scores, avg: t.avgScore
-      });
-      lss(SK.hist, history);
-    }
-
-    const valid = (t.scores || []).filter(s => s > 0);
-    const avg = valid.length ? (valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(1) : null;
-    const best = valid.length ? Math.max(...valid).toFixed(1) : null;
-
-    document.getElementById('fin-pages').textContent = RS.pages.length;
-    document.getElementById('fin-avg').textContent = avg || '—';
-    document.getElementById('fin-best').textContent = best || '—';
-    document.getElementById('finish-title').textContent = avg >= 9 ? '太棒了！' : avg >= 7 ? '读得很好！' : '继续加油！';
-    document.getElementById('finish-sub').textContent = `《${t.title}》读完啦 🎉`;
-
-    const trophy = avg >= 9 ? '🏆' : avg >= 7 ? '🥈' : '📚';
-    document.getElementById('finish-trophy').textContent = trophy;
-
-    const list = document.getElementById('fin-score-list');
-    if (t.scores && t.scores.length) {
-      list.innerHTML = t.scores.map((s, i) =>
-        `<div class="page-score-row"><span>第 ${i+1} 页</span><span style="color:${s>=9?'var(--green)':s>=7?'var(--amber)':'var(--red)'}">${s > 0 ? s.toFixed(1) + ' 分' : '—'}</span></div>`
-      ).join('');
-    } else {
-      list.innerHTML = '<div style="color:var(--text2);font-size:14px;text-align:center;padding:8px">暂无打分记录</div>';
-    }
+function finishReading(){
+  stopMic();saveScores();
+  const t=tasks.find(x=>x.id===RS.taskId);
+  if(t){
+    if(!t.readDone){t.readDone=true;state.total++;bumpStreak();lss(SK.tasks,tasks);lss(SK.state,state);}
+    const valid=(t.scores||[]).filter(s=>s>0);
+    const avg=valid.length?(valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(1):null;
+    const best=valid.length?Math.max(...valid).toFixed(1):null;
+    document.getElementById('fin-pages').textContent=RS.totalPages;
+    document.getElementById('fin-avg').textContent=avg||'—';
+    document.getElementById('fin-best').textContent=best||'—';
+    document.getElementById('finish-title').textContent=avg>=9?'太棒了！':avg>=7?'读得很好！':'继续加油！';
+    document.getElementById('finish-sub').textContent=`《${t.title}》读完啦 🎉`;
+    document.getElementById('finish-trophy').textContent=avg>=9?'🏆':avg>=7?'🥈':'📚';
+    const list=document.getElementById('fin-score-list');
+    list.innerHTML=t.scores&&t.scores.length
+      ?t.scores.map((s,i)=>`<div class="page-score-row"><span>第 ${i+1} 页</span><span style="color:${s>=9?'var(--green)':s>=7?'var(--amber)':'var(--red)'}">${s>0?s.toFixed(1)+' 分':'—'}</span></div>`).join('')
+      :'<div style="color:var(--text2);font-size:14px;text-align:center;padding:8px">暂无打分记录</div>';
   }
   showScreen('finish');
 }
 
-function backHome() {
-  showScreen('home');
-  renderHome();
-}
+function backHome(){showScreen('home');renderHome();}
 
-// ─── VOICE ───
-function toggleMic() { RS.isRec ? stopMic() : startMic(); }
+// ── VOICE ──
+function toggleMic(){RS.isRec?stopMic():startMic();}
 
-function startMic() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { alert('请使用 Safari 浏览器，并在设置中允许麦克风权限'); return; }
-
-  const rec = new SR();
-  rec.lang = 'en-US';
-  rec.continuous = true;
-  rec.interimResults = true;
-
-  let final = '';
-  rec.onresult = e => {
-    let interim = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
-      else interim += e.results[i][0].transcript;
+function startMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('请使用 Safari 浏览器并允许麦克风权限');return;}
+  const rec=new SR();
+  rec.lang='en-US';rec.continuous=true;rec.interimResults=true;
+  let final='';
+  rec.onresult=e=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';
+      else interim+=e.results[i][0].transcript;
     }
-    RS.finalText = final;
-    document.getElementById('v-transcript').textContent = (final + interim).trim() || ' ';
-    highlightWords(final + interim);
+    RS.finalText=final;
+    document.getElementById('v-transcript').textContent=(final+interim).trim()||' ';
+    if(!RS.pdfDoc)highlightWords(final+interim);
   };
-
-  rec.onend = () => {
-    if (RS.isRec) scoreAndShow(RS.finalText);
-    RS.isRec = false;
-    document.getElementById('mic-btn').className = 'mic-btn idle';
-    document.getElementById('v-status').textContent = '点麦克风重新朗读';
-  };
-
-  rec.onerror = e => {
-    document.getElementById('v-status').textContent = '错误：' + e.error + '（请检查麦克风权限）';
-    RS.isRec = false;
-    document.getElementById('mic-btn').className = 'mic-btn idle';
-  };
-
-  RS.rec = rec;
-  RS.isRec = true;
-  RS.finalText = '';
+  rec.onend=()=>{if(RS.isRec)scoreAndShow(RS.finalText);RS.isRec=false;document.getElementById('mic-btn').className='mic-btn idle';document.getElementById('v-status').textContent='点麦克风重新朗读';};
+  rec.onerror=e=>{document.getElementById('v-status').textContent='错误：'+e.error;RS.isRec=false;document.getElementById('mic-btn').className='mic-btn idle';};
+  RS.rec=rec;RS.isRec=true;RS.finalText='';
   rec.start();
-
-  document.getElementById('mic-btn').className = 'mic-btn rec';
-  document.getElementById('v-status').textContent = '录音中… 再按停止';
-  document.getElementById('score-display').style.display = 'none';
+  document.getElementById('mic-btn').className='mic-btn rec';
+  document.getElementById('v-status').textContent='录音中… 再按停止';
+  document.getElementById('score-display').style.display='none';
 }
 
-function stopMic() {
-  if (RS.rec) { try { RS.rec.stop(); } catch {} RS.rec = null; }
-  RS.isRec = false;
-  document.getElementById('mic-btn').className = 'mic-btn idle';
+function stopMic(){
+  if(RS.rec){try{RS.rec.stop();}catch{}RS.rec=null;}
+  RS.isRec=false;
+  document.getElementById('mic-btn').className='mic-btn idle';
 }
 
-function scoreAndShow(spoken) {
-  const pg = RS.pages[RS.cur] || '';
-  if (!pg.trim() || !spoken.trim()) return;
-  const score = calcScore(pg, spoken);
-  RS.pageScores[RS.cur] = score;
-  document.getElementById('page-score-num').textContent = score.toFixed(1);
-  document.getElementById('score-display').style.display = 'block';
+function scoreAndShow(spoken){
+  const text=RS.pageTexts[RS.cur]||'';
+  if(!text.trim()||!spoken.trim())return;
+  const score=calcScore(text,spoken);
+  RS.pageScores[RS.cur]=score;
+  document.getElementById('page-score-num').textContent=score.toFixed(1);
+  document.getElementById('score-display').style.display='block';
   updateAvg();
 }
 
-function calcScore(original, spoken) {
-  const norm = s => s.toLowerCase().replace(/[^a-z\s']/g, ' ').split(/\s+/).filter(Boolean);
-  const orig = norm(original), sp = norm(spoken);
-  if (!orig.length) return 10;
-  const spSet = new Set(sp);
-  let hits = 0;
-  orig.forEach(w => { if (spSet.has(w)) hits++; });
-  const accuracy = hits / orig.length;
-  const coverage = Math.min(sp.length / Math.max(orig.length, 1), 1);
-  const raw = (accuracy * 0.75 + coverage * 0.25) * 10;
-  return Math.round(Math.min(raw * 1.03, 10) * 10) / 10;
+function calcScore(original,spoken){
+  const norm=s=>s.toLowerCase().replace(/[^a-z\s']/g,' ').split(/\s+/).filter(Boolean);
+  const orig=norm(original),sp=norm(spoken);
+  if(!orig.length)return 10;
+  const spSet=new Set(sp);
+  const hits=orig.filter(w=>spSet.has(w)).length;
+  const acc=hits/orig.length;
+  const cov=Math.min(sp.length/Math.max(orig.length,1),1);
+  return Math.round(Math.min((acc*.75+cov*.25)*10*1.03,10)*10)/10;
 }
 
-function highlightWords(spoken) {
-  const norm = s => s.toLowerCase().replace(/[^a-z']/g, '');
-  const spSet = new Set(spoken.split(/\s+/).map(norm).filter(Boolean));
-  document.querySelectorAll('.word').forEach(el => {
-    const w = el.dataset.word;
-    if (w) el.className = 'word ' + (spSet.has(w) ? 'hit' : '');
+function highlightWords(spoken){
+  const norm=s=>s.toLowerCase().replace(/[^a-z']/g,'');
+  const spSet=new Set(spoken.split(/\s+/).map(norm).filter(Boolean));
+  document.querySelectorAll('.word').forEach(el=>{
+    el.className='word'+(spSet.has(el.dataset.word)?' hit':'');
   });
 }
 
-function updateAvg() {
-  const valid = RS.pageScores.filter(s => s > 0);
-  if (!valid.length) { document.getElementById('session-avg').textContent = '平均分 —'; return; }
-  const avg = valid.reduce((a, b) => a + b, 0) / valid.length;
-  document.getElementById('session-avg').textContent = '平均分 ' + avg.toFixed(1);
+function updateAvg(){
+  const valid=RS.pageScores.filter(s=>s>0);
+  document.getElementById('session-avg').textContent=valid.length?'平均分 '+(valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(1):'平均分 —';
 }
 
-// ─── SCREEN SWITCH ───
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
