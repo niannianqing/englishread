@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>家长管理端 📋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#6C63FF;--primary-bg:#F0EFFF;--primary-dark:#4F46E5;
+  --green:#22C27A;--green-bg:#E8FAF2;
+  --amber:#F59E0B;--amber-bg:#FEF3C7;
+  --red:#EF4444;--red-bg:#FEE2E2;
+  --text1:#1A1A2E;--text2:#6B7280;--text3:#9CA3AF;
+  --bg:#F8F9FF;--card:#fff;--border:#E5E7EB;
+  --radius:14px;--font:'Nunito',sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text1);min-height:100vh}
+.layout{display:flex;min-height:100vh}
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:28px 16px;flex-shrink:0;position:sticky;top:0;height:100vh}
+.logo{font-size:18px;font-weight:800;color:var(--primary);margin-bottom:32px;padding:0 8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;color:var(--text2);margin-bottom:4px;transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:var(--font)}
+.nav-item:hover{background:var(--primary-bg);color:var(--primary)}
+.nav-item.active{background:var(--primary-bg);color:var(--primary)}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+/* MAIN */
+.main{flex:1;padding:32px;max-width:860px}
+.page{display:none}.page.active{display:block}
+.page-title{font-size:22px;font-weight:800;margin-bottom:24px}
+/* CARDS */
+.card{background:var(--card);border-radius:var(--radius);padding:20px 24px;margin-bottom:16px;border:1px solid var(--border)}
+.card-title{font-size:15px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+/* STATS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-box{background:var(--card);border-radius:var(--radius);padding:16px;border:1px solid var(--border);text-align:center}
+.stat-n{font-size:28px;font-weight:800;color:var(--primary)}
+.stat-l{font-size:12px;color:var(--text2);font-weight:600;margin-top:4px}
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;padding:8px 10px;font-size:12px;font-weight:800;color:var(--text2);border-bottom:2px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border:none}
+tr:hover td{background:var(--bg)}
+/* PILLS */
+.pill{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;display:inline-block}
+.pill-raz{background:#DBEAFE;color:#1D4ED8}.pill-ox{background:#DCFCE7;color:#166534}
+.pill-rr{background:#FEE2E2;color:#991B1B}.pill-ok{background:var(--green-bg);color:#166534}
+.pill-no{background:var(--red-bg);color:#991B1B}
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-field{display:flex;flex-direction:column;gap:5px}
+label{font-size:12px;font-weight:800;color:var(--text2)}
+input,select,textarea{border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;font-family:var(--font);background:var(--card);color:var(--text1);width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary)}
+textarea{resize:vertical;min-height:80px}
+.btn{padding:10px 22px;border-radius:10px;border:1px solid var(--border);background:none;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--text1)}
+.btn:hover{background:var(--bg)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-danger{color:var(--red);border-color:var(--red)}
+.btn-danger:hover{background:var(--red-bg)}
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:28px;text-align:center;cursor:pointer;transition:all .2s}
+.upload-zone:hover{border-color:var(--primary);background:var(--primary-bg)}
+.upload-zone input{display:none}
+/* PROGRESS BAR */
+.pbar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-top:6px}
+.pbar-fill{height:100%;background:linear-gradient(90deg,var(--primary),#8B5CF6);border-radius:3px}
+/* ALERTS */
+.alert{border-radius:10px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:12px}
+.alert-ok{background:var(--green-bg);color:#166534}
+.alert-warn{background:var(--amber-bg);color:#92400E}
+/* HISTORY */
+.hist-row{display:grid;grid-template-columns:120px 1fr 80px 80px;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+.hist-row:last-child{border:none}
+.score-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+/* PAGE EDITOR */
+.page-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.page-row{display:grid;grid-template-columns:36px 1fr 36px;gap:8px;align-items:flex-start}
+.page-num{font-size:12px;font-weight:800;color:var(--text2);padding-top:10px;text-align:center}
+.link-hint{font-size:12px;color:var(--text2);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="logo">📚 家长端</div>
+  <button class="nav-item active" onclick="gotoPage('dashboard')"><span class="nav-icon">📊</span>今日概览</button>
+  <button class="nav-item" onclick="gotoPage('tasks')"><span class="nav-icon">📋</span>任务管理</button>
+  <button class="nav-item" onclick="gotoPage('books')"><span class="nav-icon">📖</span>书库管理</button>
+  <button class="nav-item" onclick="gotoPage('add-book')"><span class="nav-icon">➕</span>添加书目</button>
+  <button class="nav-item" onclick="gotoPage('history')"><span class="nav-icon">📅</span>学习记录</button>
+  <div style="margin-top:auto;padding-top:24px;border-top:1px solid var(--border);margin-top:32px">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:var(--primary-bg);color:var(--primary);text-decoration:none;font-size:14px;font-weight:700">
+      <span>📱</span> 切换到孩子端
+    </a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-title">今日概览</div>
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-n" id="d-today">0</div><div class="stat-l">今日任务</div></div>
+      <div class="stat-box"><div class="stat-n" id="d-done">0</div><div class="stat-l">已完成</div></div>
+      <div class="stat-box"><div class="stat-n" id="d-streak">0</div><div class="stat-l">连续天数</div></div>
+      <div class="stat-box"><div class="stat-n" id="d-total">0</div><div class="stat-l">累计本数</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 今日任务详情</div>
+      <div id="d-task-table"><div style="color:var(--text2);font-size:14px;text-align:center;padding:20px">暂无任务，请在孩子端生成任务</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📈 最近7天完成率</div>
+      <div id="d-week-chart"></div>
+    </div>
+  </div>
+
+  <!-- TASKS -->
+  <div class="page" id="page-tasks">
+    <div class="page-title">任务管理</div>
+    <div class="card">
+      <div class="card-title">⚙️ 任务设置</div>
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-field">
+          <label>每日新书数量</label>
+          <select id="cfg-daily" onchange="saveCfg()">
+            <option value="3">3 本（轻量）</option>
+            <option value="5" selected>5 本（标准）</option>
+            <option value="7">7 本（挑战）</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>复习模式</label>
+          <select id="cfg-review" onchange="saveCfg()">
+            <option value="1" selected>复习前一天的书</option>
+            <option value="0">不自动加复习</option>
+          </select>
+        </div>
+      </div>
+      <div id="cfg-saved" class="alert alert-ok" style="display:none">✓ 设置已保存</div>
+    </div>
+    <div class="card">
+      <div class="card-title">📅 所有任务</div>
+      <div id="all-tasks-table"></div>
+    </div>
+  </div>
+
+  <!-- BOOKS -->
+  <div class="page" id="page-books">
+    <div class="page-title">书库管理</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="lib-filters">
+      <button class="btn" style="font-size:12px;padding:6px 14px" onclick="setLibFilter('全部',this)">全部</button>
+      <button class="btn" style="font-size:12px;padding:6px 14px" onclick="setLibFilter('RAZ',this)">RAZ</button>
+      <button class="btn" style="font-size:12px;padding:6px 14px" onclick="setLibFilter('牛津树',this)">牛津树</button>
+      <button class="btn" style="font-size:12px;padding:6px 14px" onclick="setLibFilter('红火箭',this)">红火箭</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th>书名</th><th>系列</th><th>级别</th><th>页面</th><th>操作</th></tr></thead>
+        <tbody id="books-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ADD BOOK -->
+  <div class="page" id="page-add-book">
+    <div class="page-title">添加书目</div>
+    <div class="card">
+      <div class="card-title">📗 基本信息</div>
+      <div class="form-grid" style="margin-bottom:12px">
+        <div class="form-field" style="grid-column:1/-1">
+          <label>书名</label>
+          <input type="text" id="n-title" placeholder="e.g. The Big Storm">
+        </div>
+        <div class="form-field">
+          <label>系列</label>
+          <select id="n-series">
+            <option>RAZ</option><option>牛津树</option><option>红火箭</option><option>其他</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>级别</label>
+          <select id="n-level">
+            <option>F</option><option>G</option><option>H</option>
+            <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>资源链接（可选）</label>
+          <input type="text" id="n-url" placeholder="https://...">
+        </div>
+        <div class="form-field">
+          <label>备注（词汇主题等）</label>
+          <input type="text" id="n-note" placeholder="weather, safety">
+        </div>
+      </div>
+
+      <div class="card-title" style="margin-top:16px">📄 上传PDF提取页面文字</div>
+      <div class="alert alert-warn">💡 页面文字是语音打分的依据。上传PDF后会自动提取每页文字，可手动修改。</div>
+      <div class="upload-zone" onclick="document.getElementById('pdf-in').click()">
+        <input type="file" id="pdf-in" accept=".pdf" onchange="handlePDF(this)">
+        <div style="font-size:36px;margin-bottom:8px">📄</div>
+        <div style="font-weight:800;font-size:15px">点击上传书本 PDF</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px">自动提取每页文字</div>
+      </div>
+      <div id="pdf-status" style="font-size:13px;font-weight:700;color:var(--green);margin-top:8px;min-height:18px"></div>
+
+      <div id="pages-editor" style="display:none;margin-top:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:14px;font-weight:800">逐页文字（可手动编辑）</div>
+          <button class="btn" style="font-size:12px;padding:5px 12px" onclick="addPgRow()">+ 加一页</button>
+        </div>
+        <div class="page-list" id="page-list"></div>
+      </div>
+
+      <div style="margin-top:20px;display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="addBook()">✓ 保存到书库</button>
+        <button class="btn" onclick="clearForm()">清空</button>
+      </div>
+      <div id="add-msg" style="font-size:13px;font-weight:700;margin-top:10px;min-height:18px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 批量导入</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px">每行格式：<code>书名,系列,级别</code>（例：The Big Storm,RAZ,F）</div>
+      <textarea id="bulk-in" rows="6" placeholder="Henry and Mudge,RAZ,F&#10;Trucks,RAZ,G&#10;Gran,牛津树,F"></textarea>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+        <button class="btn btn-primary" onclick="bulkImport()">批量导入</button>
+        <div id="bulk-msg" style="font-size:13px;font-weight:700;color:var(--green)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="page-history">
+    <div class="page-title">学习记录</div>
+    <div class="stat-row" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat-box"><div class="stat-n" id="h-days">0</div><div class="stat-l">学习天数</div></div>
+      <div class="stat-box"><div class="stat-n" id="h-total">0</div><div class="stat-l">累计本数</div></div>
+      <div class="stat-box"><div class="stat-n" id="h-avg">—</div><div class="stat-l">平均得分</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📅 历史记录</div>
+      <div id="hist-list"><div style="color:var(--text2);text-align:center;padding:20px;font-size:14px">暂无记录</div></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script src="books.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const SK={tasks:'ra_tasks_v4',state:'ra_state_v4',hist:'ra_hist_v4',cfg:'ra_cfg_v1'};
+function ls(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}}
+function lss(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+
+let tasks=ls(SK.tasks)||[];
+let state=ls(SK.state)||{streak:0,total:0,lastDate:''};
+let history=ls(SK.hist)||[];
+let cfg=ls(SK.cfg)||{daily:5,review:1};
+let libFilter='全部';
+let pendingPages=[];
+let editingBookId=null;
+
+function today(){return new Date().toISOString().slice(0,10);}
+function fmtDate(d){const[,m,dd]=d.split('-');return `${m}月${dd}日`;}
+
+function gotoPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const navMap={dashboard:0,tasks:1,books:2,'add-book':3,history:4};
+  document.querySelectorAll('.nav-item')[navMap[id]]?.classList.add('active');
+  if(id==='dashboard')renderDashboard();
+  if(id==='tasks')renderTasks();
+  if(id==='books')renderBooks();
+  if(id==='history')renderHistory();
+}
+
+function seriesPill(s){
+  const m={RAZ:'pill-raz','牛津树':'pill-ox','红火箭':'pill-rr'};
+  return `<span class="pill ${m[s]||''}">${s}</span>`;
+}
+
+// ── DASHBOARD ──
+function renderDashboard(){
+  const td=today();
+  const tt=tasks.filter(t=>t.date===td);
+  const done=tt.filter(t=>t.readDone).length;
+  document.getElementById('d-today').textContent=tt.length;
+  document.getElementById('d-done').textContent=done;
+  document.getElementById('d-streak').textContent=state.streak;
+  document.getElementById('d-total').textContent=state.total;
+
+  const tbody=document.getElementById('d-task-table');
+  if(!tt.length){tbody.innerHTML='<div style="color:var(--text2);text-align:center;padding:20px;font-size:14px">暂无任务</div>';return;}
+  tbody.innerHTML=`<table><thead><tr><th>书名</th><th>系列/级别</th><th>类型</th><th>读</th><th>录</th><th>题</th><th>得分</th></tr></thead><tbody>`+
+  tt.map(t=>`<tr>
+    <td style="font-weight:700">${t.title}</td>
+    <td>${seriesPill(t.series)} <span class="pill" style="background:var(--bg);color:var(--text2)">${t.level}</span></td>
+    <td>${t.isReview?'<span class="pill pill-ok">复习</span>':t.isCarry?'<span class="pill" style="background:#FFE4E6;color:#9F1239">顺延</span>':'<span class="pill pill-raz">新书</span>'}</td>
+    <td>${t.readDone?'✅':'○'}</td>
+    <td>${t.recDone?'✅':'○'}</td>
+    <td>${t.quizDone?'✅':'○'}</td>
+    <td style="font-weight:800;color:var(--green)">${t.avgScore!==null?t.avgScore:'—'}</td>
+  </tr>`).join('')+`</tbody></table>`;
+
+  // week chart
+  const wc=document.getElementById('d-week-chart');
+  const days=[];
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+  wc.innerHTML=`<div style="display:flex;gap:8px;align-items:flex-end;height:80px;padding:8px 0">`+
+  days.map(d=>{
+    const dt=tasks.filter(t=>t.date===d);
+    const pct=dt.length?Math.round(dt.filter(t=>t.readDone).length/dt.length*100):0;
+    const [,m,dd]=d.split('-');
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div style="font-size:11px;font-weight:700;color:var(--text2)">${pct?pct+'%':''}</div>
+      <div style="width:100%;border-radius:6px;background:var(--primary);opacity:${dt.length?0.2+pct/100*0.8:0.1};height:${Math.max(pct*0.5,4)}px;min-height:4px"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2)">${parseInt(dd)}日</div>
+    </div>`;
+  }).join('')+`</div>`;
+}
+
+// ── TASKS ──
+function renderTasks(){
+  document.getElementById('cfg-daily').value=cfg.daily;
+  document.getElementById('cfg-review').value=cfg.review;
+  const sorted=[...tasks].sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('all-tasks-table').innerHTML=sorted.length?
+  `<table><thead><tr><th>日期</th><th>书名</th><th>类型</th><th>读</th><th>录</th><th>题</th><th>得分</th></tr></thead><tbody>`+
+  sorted.map(t=>`<tr>
+    <td style="font-size:12px;color:var(--text2);font-weight:700">${fmtDate(t.date)}</td>
+    <td style="font-weight:700">${t.title}</td>
+    <td>${seriesPill(t.series)}</td>
+    <td>${t.readDone?'✅':'○'}</td>
+    <td>${t.recDone?'✅':'○'}</td>
+    <td>${t.quizDone?'✅':'○'}</td>
+    <td style="font-weight:800;color:var(--green)">${t.avgScore!==null?t.avgScore:'—'}</td>
+  </tr>`).join('')+`</tbody></table>`
+  :'<div style="color:var(--text2);text-align:center;padding:20px;font-size:14px">暂无任务记录</div>';
+}
+
+function saveCfg(){
+  cfg.daily=parseInt(document.getElementById('cfg-daily').value);
+  cfg.review=parseInt(document.getElementById('cfg-review').value);
+  lss(SK.cfg,cfg);
+  const el=document.getElementById('cfg-saved');
+  el.style.display='block';
+  setTimeout(()=>el.style.display='none',2000);
+}
+
+// ── BOOKS ──
+function setLibFilter(v,btn){
+  libFilter=v;
+  document.querySelectorAll('#lib-filters .btn').forEach(b=>b.style.background='');
+  btn.style.background='var(--primary-bg)';btn.style.color='var(--primary)';
+  renderBooks();
+}
+
+function renderBooks(){
+  const filtered=BOOKS_DATA.filter(b=>libFilter==='全部'||b.series===libFilter);
+  const tbody=document.getElementById('books-tbody');
+  tbody.innerHTML=filtered.map(b=>`<tr>
+    <td style="font-weight:700">${b.title}${b.note?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${b.note}</div>`:''}</td>
+    <td>${seriesPill(b.series)}</td>
+    <td><span class="pill" style="background:var(--bg);color:var(--text1);font-weight:800">${b.level}</span></td>
+    <td>${b.pages&&b.pages.length?`<span class="pill pill-ok">${b.pages.length}页</span>`:'<span class="pill pill-no">未录入</span>'}</td>
+    <td><button class="btn btn-danger" style="font-size:11px;padding:4px 10px" onclick="startEditBook('${b.id}')">编辑页面</button></td>
+  </tr>`).join('');
+}
+
+function startEditBook(id){
+  const b=BOOKS_DATA.find(x=>x.id===id);if(!b)return;
+  editingBookId=id;
+  pendingPages=b.pages?[...b.pages]:[];
+  document.getElementById('n-title').value=b.title;
+  document.getElementById('n-series').value=b.series;
+  document.getElementById('n-level').value=b.level;
+  document.getElementById('n-url').value=b.url||'';
+  document.getElementById('n-note').value=b.note||'';
+  renderPagesEditor();
+  gotoPage('add-book');
+}
+
+// ── ADD BOOK ──
+async function handlePDF(input){
+  const file=input.files[0];if(!file)return;
+  if(typeof pdfjsLib==='undefined'){document.getElementById('pdf-status').textContent='⚠ PDF库加载中，请稍后重试';return;}
+  document.getElementById('pdf-status').textContent='⏳ 提取中…';
+  try{
+    const ab=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+    pendingPages=[];
+    for(let i=1;i<=pdf.numPages;i++){
+      const pg=await pdf.getPage(i);
+      const tc=await pg.getTextContent();
+      pendingPages.push(tc.items.map(it=>it.str).join(' ').trim());
+    }
+    document.getElementById('pdf-status').textContent=`✓ 提取完成，共 ${pendingPages.length} 页`;
+    renderPagesEditor();
+  }catch(e){document.getElementById('pdf-status').textContent='❌ 失败：'+e.message;}
+}
+
+function renderPagesEditor(){
+  document.getElementById('pages-editor').style.display='block';
+  document.getElementById('page-list').innerHTML=pendingPages.map((txt,i)=>`
+  <div class="page-row">
+    <div class="page-num">P${i+1}</div>
+    <textarea id="pg_${i}" onchange="pendingPages[${i}]=this.value">${txt}</textarea>
+    <button class="btn btn-danger" style="font-size:12px;padding:5px 8px;margin-top:4px" onclick="removePg(${i})">✕</button>
+  </div>`).join('');
+}
+
+function addPgRow(){pendingPages.push('');renderPagesEditor();}
+function removePg(i){pendingPages.splice(i,1);renderPagesEditor();}
+
+function addBook(){
+  const title=document.getElementById('n-title').value.trim();
+  if(!title){alert('请填写书名');return;}
+  const pages=pendingPages.filter(p=>p.trim());
+
+  if(editingBookId){
+    // update existing in BOOKS_DATA (runtime only — to persist, user must edit books.js)
+    const b=BOOKS_DATA.find(x=>x.id===editingBookId);
+    if(b){b.pages=pages;b.url=document.getElementById('n-url').value.trim();b.note=document.getElementById('n-note').value.trim();}
+    // also save to localStorage so child page picks it up
+    let extra=ls('ra_extra_books')||{};
+    extra[editingBookId]=pages;
+    lss('ra_extra_books',extra);
+    document.getElementById('add-msg').textContent='✓ 页面已更新（'+pages.length+'页）';
+    editingBookId=null;
+  }else{
+    const newBook={
+      id:'u_'+Date.now(),
+      title,series:document.getElementById('n-series').value,
+      level:document.getElementById('n-level').value,
+      url:document.getElementById('n-url').value.trim(),
+      note:document.getElementById('n-note').value.trim(),
+      pages
+    };
+    BOOKS_DATA.push(newBook);
+    let extras=ls('ra_user_books')||[];
+    extras.push(newBook);
+    lss('ra_user_books',extras);
+    document.getElementById('add-msg').textContent=`✓ "${title}" 已添加（${pages.length}页）`;
+  }
+  setTimeout(()=>document.getElementById('add-msg').textContent='',3000);
+  clearForm();
+}
+
+function clearForm(){
+  document.getElementById('n-title').value='';
+  document.getElementById('n-url').value='';
+  document.getElementById('n-note').value='';
+  pendingPages=[];editingBookId=null;
+  document.getElementById('pages-editor').style.display='none';
+  document.getElementById('pdf-status').textContent='';
+  document.getElementById('pdf-in').value='';
+}
+
+function bulkImport(){
+  const lines=document.getElementById('bulk-in').value.trim().split('\n').filter(Boolean);
+  let n=0;
+  lines.forEach(ln=>{
+    const p=ln.split(',').map(s=>s.trim());
+    if(p.length<3)return;
+    const b={id:'bi_'+Date.now()+'_'+n,title:p[0],series:p[1],level:p[2],url:p[3]||'',note:p[4]||'',pages:[]};
+    BOOKS_DATA.push(b);
+    let ex=ls('ra_user_books')||[];ex.push(b);lss('ra_user_books',ex);
+    n++;
+  });
+  document.getElementById('bulk-msg').textContent=`✓ 导入 ${n} 本`;
+  document.getElementById('bulk-in').value='';
+  setTimeout(()=>document.getElementById('bulk-msg').textContent='',3000);
+}
+
+// ── HISTORY ──
+function renderHistory(){
+  document.getElementById('h-days').textContent=history.length;
+  document.getElementById('h-total').textContent=state.total;
+  const allScores=tasks.flatMap(t=>t.scores||[]).filter(s=>s>0);
+  document.getElementById('h-avg').textContent=allScores.length?(allScores.reduce((a,b)=>a+b,0)/allScores.length).toFixed(1)+'分':'—';
+
+  const el=document.getElementById('hist-list');
+  if(!history.length){el.innerHTML='<div style="color:var(--text2);text-align:center;padding:20px;font-size:14px">暂无记录</div>';return;}
+  el.innerHTML=history.slice(0,50).map(h=>`
+  <div class="hist-row">
+    <div style="font-size:12px;color:var(--text2);font-weight:700">${fmtDate(h.date)}</div>
+    <div style="font-weight:700">${h.title}</div>
+    <div style="font-size:12px;color:var(--text2)">${(h.scores||[]).map(s=>s.toFixed(1)).join(' · ')||'—'}</div>
+    <div style="font-size:20px;font-weight:800;color:var(--green)">${h.avg||'—'}</div>
+  </div>`).join('');
+}
+
+renderDashboard();
+</script>
+</body>
+</html>
