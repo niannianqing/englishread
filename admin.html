@@ -165,13 +165,16 @@ textarea{resize:vertical;min-height:80px}
     </div>
     <div class="card" style="padding:0;overflow:hidden">
       <table>
-        <thead><tr><th>书名</th><th>系列</th><th>级别</th><th>页面</th><th>操作</th></tr></thead>
+        <thead><tr><th>书名</th><th>系列</th><th>级别</th><th>文字</th><th>图片</th><th>操作</th></tr></thead>
         <tbody id="books-tbody"></tbody>
       </table>
     </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">💾 本机存储空间</div>
+      <div id="storage-info" style="font-size:14px;color:var(--text2);margin-bottom:12px">计算中…</div>
+      <button class="btn btn-danger" style="font-size:13px" onclick="clearAllImages()">🗑 清空所有书页图片</button>
+    </div>
   </div>
-
-  <!-- ADD BOOK -->
   <div class="page" id="page-add-book">
     <div class="page-title">添加书目</div>
     <div class="card">
@@ -204,15 +207,38 @@ textarea{resize:vertical;min-height:80px}
         </div>
       </div>
 
-      <div class="card-title" style="margin-top:16px">📄 上传PDF提取页面文字</div>
-      <div class="alert alert-warn">💡 页面文字是语音打分的依据。上传PDF后会自动提取每页文字，可手动修改。</div>
-      <div class="upload-zone" onclick="document.getElementById('pdf-in').click()">
+      <div class="card-title" style="margin-top:16px">📄 上传 PDF（自动转图片 + 提取文字）</div>
+      <div class="alert alert-ok">✨ 上传一次即可！系统自动把每页转成图片并提取文字，全部存在本机，孩子端直接读取。</div>
+      <div class="upload-zone" id="pdf-drop-zone" onclick="document.getElementById('pdf-in').click()">
         <input type="file" id="pdf-in" accept=".pdf" onchange="handlePDF(this)">
         <div style="font-size:36px;margin-bottom:8px">📄</div>
         <div style="font-weight:800;font-size:15px">点击上传书本 PDF</div>
-        <div style="font-size:13px;color:var(--text2);margin-top:4px">自动提取每页文字</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px">自动转图片 · 自动提取文字 · 存本机</div>
+      </div>
+
+      <!-- PDF处理进度 -->
+      <div id="pdf-progress-wrap" style="display:none;margin-top:16px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px">
+          <span id="pdf-prog-label">处理中…</span>
+          <span id="pdf-prog-pct">0%</span>
+        </div>
+        <div class="pbar"><div class="pbar-fill" id="pdf-prog-bar" style="width:0%;transition:width .3s"></div></div>
+        <div id="pdf-preview-strip" style="display:flex;gap:6px;margin-top:10px;overflow-x:auto;padding-bottom:4px"></div>
       </div>
       <div id="pdf-status" style="font-size:13px;font-weight:700;color:var(--green);margin-top:8px;min-height:18px"></div>
+
+      <!-- 跳过设置：跳过封面/封底页数 -->
+      <div id="pdf-skip-wrap" style="display:none;margin-top:8px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <div class="form-field" style="flex:1;min-width:120px">
+          <label>跳过开头几页（封面/版权页）</label>
+          <input type="number" id="skip-front" value="2" min="0" max="10" style="max-width:80px">
+        </div>
+        <div class="form-field" style="flex:1;min-width:120px">
+          <label>跳过结尾几页（封底）</label>
+          <input type="number" id="skip-back" value="2" min="0" max="10" style="max-width:80px">
+        </div>
+        <button class="btn btn-primary" style="margin-top:18px" onclick="reprocessPDF()">重新处理</button>
+      </div>
 
       <div id="pages-editor" style="display:none;margin-top:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -370,16 +396,228 @@ function setLibFilter(v,btn){
   renderBooks();
 }
 
-function renderBooks(){
+// ══════════════════════════════════════════
+//  IndexedDB — 书页图片存储
+// ══════════════════════════════════════════
+const DB_NAME='ReadingAppDB',DB_VER=1,IMG_STORE='book_images';
+let _db=null;
+function openDB(){
+  if(_db)return Promise.resolve(_db);
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(DB_NAME,DB_VER);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains(IMG_STORE))db.createObjectStore(IMG_STORE);
+    };
+    req.onsuccess=e=>{_db=e.target.result;res(_db);};
+    req.onerror=e=>rej(e);
+  });
+}
+async function dbSet(key,val){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(IMG_STORE,'readwrite');tx.objectStore(IMG_STORE).put(val,key);tx.oncomplete=()=>res();tx.onerror=e=>rej(e);});}
+async function dbGet(key){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(IMG_STORE,'readonly');const req=tx.objectStore(IMG_STORE).get(key);req.onsuccess=()=>res(req.result);req.onerror=e=>rej(e);});}
+async function dbDel(key){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(IMG_STORE,'readwrite');tx.objectStore(IMG_STORE).delete(key);tx.oncomplete=()=>res();tx.onerror=e=>rej(e);});}
+async function dbKeys(){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(IMG_STORE,'readonly');const req=tx.objectStore(IMG_STORE).getAllKeys();req.onsuccess=()=>res(req.result);req.onerror=e=>rej(e);});}
+
+async function updateStorageInfo(){
+  try{
+    const keys=await dbKeys();
+    const imgKeys=keys.filter(k=>String(k).startsWith('img:'));
+    let totalBytes=0;
+    for(const k of imgKeys){const v=await dbGet(k);if(v)totalBytes+=(v.length||0)*0.75;}
+    const mb=(totalBytes/1024/1024).toFixed(1);
+    const el=document.getElementById('storage-info');
+    if(el)el.innerHTML=`已存 <b>${imgKeys.length}</b> 页图片，约占 <b>${mb} MB</b>（仅本设备可用）`;
+  }catch(e){console.error(e);}
+}
+
+async function clearAllImages(){
+  if(!confirm('确认清空所有书页图片？（文字数据不受影响）'))return;
+  const keys=await dbKeys();
+  for(const k of keys){if(String(k).startsWith('img:'))await dbDel(k);}
+  updateStorageInfo();renderBooks();alert('已清空');
+}
+
+// ── PDF处理 ──
+let _rawPdfData=null;
+
+async function handlePDF(input){
+  const file=input.files[0];if(!file)return;
+  if(typeof pdfjsLib==='undefined'){document.getElementById('pdf-status').textContent='⚠ PDF库加载中，请稍后重试';return;}
+  _rawPdfData=await file.arrayBuffer();
+  await processPDF(_rawPdfData);
+}
+
+async function reprocessPDF(){
+  if(!_rawPdfData){alert('请先上传PDF');return;}
+  await processPDF(_rawPdfData);
+}
+
+async function processPDF(arrayBuffer){
+  const skipFront=parseInt(document.getElementById('skip-front').value)||0;
+  const skipBack=parseInt(document.getElementById('skip-back').value)||0;
+  document.getElementById('pdf-progress-wrap').style.display='block';
+  document.getElementById('pdf-skip-wrap').style.display='flex';
+  document.getElementById('pdf-status').textContent='';
+
+  const setProgress=(cur,total,label)=>{
+    const pct=Math.round(cur/total*100);
+    document.getElementById('pdf-prog-label').textContent=label;
+    document.getElementById('pdf-prog-pct').textContent=pct+'%';
+    document.getElementById('pdf-prog-bar').style.width=pct+'%';
+  };
+
+  try{
+    const pdf=await pdfjsLib.getDocument({data:arrayBuffer.slice(0)}).promise;
+    const total=pdf.numPages;
+    const startPage=1+skipFront;
+    const endPage=total-skipBack;
+    const contentPages=Math.max(0,endPage-startPage+1);
+    if(contentPages<=0){document.getElementById('pdf-status').textContent='⚠ 跳过页数设置有误，内容页为0';return;}
+
+    setProgress(0,contentPages,'准备中…');
+    pendingPages=[];
+    const previewStrip=document.getElementById('pdf-preview-strip');
+    previewStrip.innerHTML='';
+    // 先清空旧的pending图片
+    const oldKeys=await dbKeys();
+    for(const k of oldKeys){if(String(k).startsWith('img:__pending__:'))await dbDel(k);}
+
+    const offCanvas=document.createElement('canvas');
+    const ctx=offCanvas.getContext('2d');
+
+    for(let i=startPage;i<=endPage;i++){
+      const pg=await pdf.getPage(i);
+      const idx=i-startPage;
+      // 提取文字
+      const tc=await pg.getTextContent();
+      pendingPages.push(tc.items.map(it=>it.str).join(' ').trim());
+      // 渲染图片
+      const vp=pg.getViewport({scale:1.5});
+      offCanvas.width=vp.width;offCanvas.height=vp.height;
+      await pg.render({canvasContext:ctx,viewport:vp}).promise;
+      const dataUrl=offCanvas.toDataURL('image/jpeg',0.85);
+      await dbSet(`img:__pending__:${idx}`,dataUrl);
+      // 预览缩略图
+      const thumb=document.createElement('img');
+      thumb.src=dataUrl;
+      thumb.style.cssText='height:64px;border-radius:6px;flex-shrink:0;border:2px solid var(--border)';
+      previewStrip.appendChild(thumb);
+      setProgress(idx+1,contentPages,`处理第 ${idx+1} / ${contentPages} 页…`);
+      await new Promise(r=>setTimeout(r,0));
+    }
+
+    setProgress(contentPages,contentPages,'✅ 处理完成！');
+    document.getElementById('pdf-status').textContent=`✓ ${contentPages} 页已就绪，请填写书名后点"保存到书库"。`;
+    renderPagesEditor();
+  }catch(e){
+    document.getElementById('pdf-status').textContent='❌ 处理失败：'+e.message;console.error(e);
+  }
+}
+
+async function migratePendingImages(bookId){
+  const keys=await dbKeys();
+  const pending=keys.filter(k=>String(k).startsWith('img:__pending__:'));
+  for(const k of pending){
+    const idx=String(k).split(':')[2];
+    const data=await dbGet(k);
+    if(data)await dbSet(`img:${bookId}:${idx}`,data);
+    await dbDel(k);
+  }
+}
+
+function renderPagesEditor(){
+  document.getElementById('pages-editor').style.display='block';
+  document.getElementById('page-list').innerHTML=pendingPages.map((txt,i)=>`
+  <div class="page-row">
+    <div class="page-num">P${i+1}</div>
+    <textarea id="pg_${i}" onchange="pendingPages[${i}]=this.value">${txt}</textarea>
+    <button class="btn btn-danger" style="font-size:12px;padding:5px 8px;margin-top:4px" onclick="removePg(${i})">✕</button>
+  </div>`).join('');
+}
+function addPgRow(){pendingPages.push('');renderPagesEditor();}
+function removePg(i){pendingPages.splice(i,1);renderPagesEditor();}
+
+async function addBook(){
+  const title=document.getElementById('n-title').value.trim();
+  if(!title){alert('请填写书名');return;}
+  // 同步textarea的最新内容
+  pendingPages=pendingPages.map((_,i)=>document.getElementById('pg_'+i)?.value??_);
+  const cleanPages=pendingPages.filter(p=>p.trim());
+
+  if(editingBookId){
+    const b=BOOKS_DATA.find(x=>x.id===editingBookId);
+    if(b){b.pages=cleanPages;b.url=document.getElementById('n-url').value.trim();b.note=document.getElementById('n-note').value.trim();}
+    let extra=ls('ra_extra_books')||{};
+    extra[editingBookId]={pages:cleanPages};
+    lss('ra_extra_books',extra);
+    await migratePendingImages(editingBookId);
+    const imgCount=(await dbKeys()).filter(k=>String(k).startsWith(`img:${editingBookId}:`)).length;
+    document.getElementById('add-msg').textContent=`✓ 已更新（${cleanPages.length}页文字，${imgCount}页图片）`;
+    editingBookId=null;
+  }else{
+    const bookId='u_'+Date.now();
+    const newBook={id:bookId,title,series:document.getElementById('n-series').value,
+      level:document.getElementById('n-level').value,
+      url:document.getElementById('n-url').value.trim(),
+      note:document.getElementById('n-note').value.trim(),pages:cleanPages};
+    BOOKS_DATA.push(newBook);
+    let extras=ls('ra_user_books')||[];extras.push(newBook);lss('ra_user_books',extras);
+    await migratePendingImages(bookId);
+    const imgCount=(await dbKeys()).filter(k=>String(k).startsWith(`img:${bookId}:`)).length;
+    document.getElementById('add-msg').textContent=`✓ "${title}" 已添加（${cleanPages.length}页文字，${imgCount}页图片）`;
+  }
+  setTimeout(()=>document.getElementById('add-msg').textContent='',4000);
+  clearForm();updateStorageInfo();
+}
+
+function clearForm(){
+  document.getElementById('n-title').value='';
+  document.getElementById('n-url').value='';
+  document.getElementById('n-note').value='';
+  pendingPages=[];editingBookId=null;_rawPdfData=null;
+  document.getElementById('pages-editor').style.display='none';
+  document.getElementById('pdf-progress-wrap').style.display='none';
+  document.getElementById('pdf-skip-wrap').style.display='none';
+  document.getElementById('pdf-status').textContent='';
+  document.getElementById('pdf-in').value='';
+  document.getElementById('pdf-preview-strip').innerHTML='';
+}
+
+// ── BOOKS 渲染（含图片状态）──
+function setLibFilter(v,btn){
+  libFilter=v;
+  document.querySelectorAll('#lib-filters .btn').forEach(b=>b.style.background='');
+  btn.style.background='var(--primary-bg)';btn.style.color='var(--primary)';
+  renderBooks();
+}
+
+async function renderBooks(){
   const filtered=BOOKS_DATA.filter(b=>libFilter==='全部'||b.series===libFilter);
+  const keys=await dbKeys();
+  const imgKeySet=new Set(keys.filter(k=>String(k).startsWith('img:')).map(k=>String(k).split(':')[1]));
   const tbody=document.getElementById('books-tbody');
-  tbody.innerHTML=filtered.map(b=>`<tr>
+  tbody.innerHTML=filtered.map(b=>{
+    const hasImg=imgKeySet.has(b.id);
+    const imgCount=keys.filter(k=>String(k).startsWith(`img:${b.id}:`)).length;
+    return `<tr>
     <td style="font-weight:700">${b.title}${b.note?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${b.note}</div>`:''}</td>
     <td>${seriesPill(b.series)}</td>
     <td><span class="pill" style="background:var(--bg);color:var(--text1);font-weight:800">${b.level}</span></td>
     <td>${b.pages&&b.pages.length?`<span class="pill pill-ok">${b.pages.length}页</span>`:'<span class="pill pill-no">未录入</span>'}</td>
-    <td><button class="btn btn-danger" style="font-size:11px;padding:4px 10px" onclick="startEditBook('${b.id}')">编辑页面</button></td>
-  </tr>`).join('');
+    <td>${hasImg?`<span class="pill pill-ok">✓ ${imgCount}页</span>`:'<span class="pill pill-no">无图片</span>'}</td>
+    <td style="display:flex;gap:6px">
+      <button class="btn btn-danger" style="font-size:11px;padding:4px 10px" onclick="startEditBook('${b.id}')">编辑</button>
+      ${hasImg?`<button class="btn" style="font-size:11px;padding:4px 10px;color:var(--red);border-color:var(--red)" onclick="deleteBookImages('${b.id}')">删图</button>`:''}
+    </td></tr>`;
+  }).join('');
+  updateStorageInfo();
+}
+
+async function deleteBookImages(bookId){
+  if(!confirm('删除这本书的图片？（文字不受影响）'))return;
+  const keys=await dbKeys();
+  for(const k of keys){if(String(k).startsWith(`img:${bookId}:`))await dbDel(k);}
+  renderBooks();
 }
 
 function startEditBook(id){
@@ -393,82 +631,6 @@ function startEditBook(id){
   document.getElementById('n-note').value=b.note||'';
   renderPagesEditor();
   gotoPage('add-book');
-}
-
-// ── ADD BOOK ──
-async function handlePDF(input){
-  const file=input.files[0];if(!file)return;
-  if(typeof pdfjsLib==='undefined'){document.getElementById('pdf-status').textContent='⚠ PDF库加载中，请稍后重试';return;}
-  document.getElementById('pdf-status').textContent='⏳ 提取中…';
-  try{
-    const ab=await file.arrayBuffer();
-    const pdf=await pdfjsLib.getDocument({data:ab}).promise;
-    pendingPages=[];
-    for(let i=1;i<=pdf.numPages;i++){
-      const pg=await pdf.getPage(i);
-      const tc=await pg.getTextContent();
-      pendingPages.push(tc.items.map(it=>it.str).join(' ').trim());
-    }
-    document.getElementById('pdf-status').textContent=`✓ 提取完成，共 ${pendingPages.length} 页`;
-    renderPagesEditor();
-  }catch(e){document.getElementById('pdf-status').textContent='❌ 失败：'+e.message;}
-}
-
-function renderPagesEditor(){
-  document.getElementById('pages-editor').style.display='block';
-  document.getElementById('page-list').innerHTML=pendingPages.map((txt,i)=>`
-  <div class="page-row">
-    <div class="page-num">P${i+1}</div>
-    <textarea id="pg_${i}" onchange="pendingPages[${i}]=this.value">${txt}</textarea>
-    <button class="btn btn-danger" style="font-size:12px;padding:5px 8px;margin-top:4px" onclick="removePg(${i})">✕</button>
-  </div>`).join('');
-}
-
-function addPgRow(){pendingPages.push('');renderPagesEditor();}
-function removePg(i){pendingPages.splice(i,1);renderPagesEditor();}
-
-function addBook(){
-  const title=document.getElementById('n-title').value.trim();
-  if(!title){alert('请填写书名');return;}
-  const pages=pendingPages.filter(p=>p.trim());
-
-  if(editingBookId){
-    // update existing in BOOKS_DATA (runtime only — to persist, user must edit books.js)
-    const b=BOOKS_DATA.find(x=>x.id===editingBookId);
-    if(b){b.pages=pages;b.url=document.getElementById('n-url').value.trim();b.note=document.getElementById('n-note').value.trim();}
-    // also save to localStorage so child page picks it up
-    let extra=ls('ra_extra_books')||{};
-    extra[editingBookId]=pages;
-    lss('ra_extra_books',extra);
-    document.getElementById('add-msg').textContent='✓ 页面已更新（'+pages.length+'页）';
-    editingBookId=null;
-  }else{
-    const newBook={
-      id:'u_'+Date.now(),
-      title,series:document.getElementById('n-series').value,
-      level:document.getElementById('n-level').value,
-      url:document.getElementById('n-url').value.trim(),
-      note:document.getElementById('n-note').value.trim(),
-      pages
-    };
-    BOOKS_DATA.push(newBook);
-    let extras=ls('ra_user_books')||[];
-    extras.push(newBook);
-    lss('ra_user_books',extras);
-    document.getElementById('add-msg').textContent=`✓ "${title}" 已添加（${pages.length}页）`;
-  }
-  setTimeout(()=>document.getElementById('add-msg').textContent='',3000);
-  clearForm();
-}
-
-function clearForm(){
-  document.getElementById('n-title').value='';
-  document.getElementById('n-url').value='';
-  document.getElementById('n-note').value='';
-  pendingPages=[];editingBookId=null;
-  document.getElementById('pages-editor').style.display='none';
-  document.getElementById('pdf-status').textContent='';
-  document.getElementById('pdf-in').value='';
 }
 
 function bulkImport(){
