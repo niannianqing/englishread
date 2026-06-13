@@ -768,14 +768,15 @@ async function startBatchImport(input){
         const tc1=await pg1.getTextContent();
         const lines=tc1.items.map(it=>it.str.trim()).filter(Boolean);
         // 找第一条看起来像书名的行（不含网址、不含"Level"、不含"Word Count"、长度合理）
-        const candidate=lines.find(l=>
+        // 按Y坐标排序，取最顶部的文字作为书名
+        const itemsWithPos=tc1.items.filter(it=>it.str.trim().length>2);
+        itemsWithPos.sort((a,b)=>(b.transform[5]||0)-(a.transform[5]||0));
+        const topItems=itemsWithPos.slice(0,5).map(it=>it.str.trim());
+        const candidate=topItems.find(l=>
           l.length>2 && l.length<60 &&
           !l.includes('www.') &&
-          !l.toLowerCase().includes('level') &&
           !l.toLowerCase().includes('word count') &&
-          !l.toLowerCase().includes('reading a') &&
           !l.toLowerCase().includes('visit') &&
-          !l.toLowerCase().includes('benchmark') &&
           /[a-zA-Z]/.test(l)
         );
         if(candidate) title=candidate;
