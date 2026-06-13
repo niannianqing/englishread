@@ -745,7 +745,7 @@ async function startBatchImport(input){
     const file=files[fi];
     const parsed=parseRazFilename(file.name);
 
-    document.getElementById('batch-book-label').textContent=`处理第 ${fi+1} 本：${parsed.title}`;
+    document.getElementById('batch-book-label').textContent=`处理第 ${fi+1} 本：${file.name}`;
     document.getElementById('batch-book-pct').textContent=`${fi+1} / ${files.length}`;
     document.getElementById('batch-book-bar').style.width=((fi+1)/files.length*100)+'%';
     document.getElementById('batch-page-label').textContent='读取中…';
@@ -758,6 +758,30 @@ async function startBatchImport(input){
       const startPage=1+skipFront;
       const endPage=Math.max(startPage,total-skipBack);
       const contentPages=endPage-startPage+1;
+
+      // ── 从第1页提取书名 ──
+      // RAZ第1页格式："A Dog for Sally\nA Reading A–Z Level G...\nWord Count: 180"
+      // 取第一行非空文字即为书名
+      let title=parsed.title; // 默认用文件名
+      try{
+        const pg1=await pdf.getPage(1);
+        const tc1=await pg1.getTextContent();
+        const lines=tc1.items.map(it=>it.str.trim()).filter(Boolean);
+        // 找第一条看起来像书名的行（不含网址、不含"Level"、不含"Word Count"、长度合理）
+        const candidate=lines.find(l=>
+          l.length>2 && l.length<60 &&
+          !l.includes('www.') &&
+          !l.toLowerCase().includes('level') &&
+          !l.toLowerCase().includes('word count') &&
+          !l.toLowerCase().includes('reading a') &&
+          !l.toLowerCase().includes('visit') &&
+          !l.toLowerCase().includes('benchmark') &&
+          /[a-zA-Z]/.test(l)
+        );
+        if(candidate) title=candidate;
+      }catch(e){console.warn('title extract failed',e);}
+
+      document.getElementById('batch-book-label').textContent=`处理第 ${fi+1} 本：${title}`;
 
       const pages=[];
       const offCanvas=document.createElement('canvas');
@@ -791,7 +815,7 @@ async function startBatchImport(input){
 
       const book={
         id:bookId,
-        title:parsed.title,
+        title,
         series:'RAZ',
         level:parsed.level,
         url:'',note:'',
@@ -805,7 +829,7 @@ async function startBatchImport(input){
       card.innerHTML=`
         <span style="font-size:20px">✅</span>
         <div style="flex:1">
-          <input id="btitle_${fi}" value="${parsed.title}" style="font-weight:800;font-size:14px;border:none;background:transparent;width:100%;color:var(--text1);font-family:var(--font)" placeholder="书名">
+          <input id="btitle_${fi}" value="${title}" style="font-weight:800;font-size:14px;border:none;background:transparent;width:100%;color:var(--text1);font-family:var(--font)" placeholder="书名">
           <div style="font-size:12px;color:var(--text2);margin-top:2px">RAZ Level ${parsed.level} · ${contentPages}页图片 · ${pages.filter(p=>p.trim()).length}页文字</div>
         </div>
         <span class="pill pill-ok">Level ${parsed.level}</span>`;
