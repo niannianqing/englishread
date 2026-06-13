@@ -631,6 +631,7 @@ async function renderBooks(){
     <td style="display:flex;gap:6px">
       <button class="btn btn-danger" style="font-size:11px;padding:4px 10px" onclick="startEditBook('${b.id}')">编辑</button>
       ${hasImg?`<button class="btn" style="font-size:11px;padding:4px 10px;color:var(--red);border-color:var(--red)" onclick="deleteBookImages('${b.id}')">删图</button>`:''}
+      <button class="btn" style="font-size:11px;padding:4px 10px;color:var(--red);border-color:var(--red)" onclick="deleteBook('${b.id}')">删除</button>
     </td></tr>`;
   }).join('');
   updateStorageInfo();
@@ -640,6 +641,26 @@ async function deleteBookImages(bookId){
   if(!confirm('删除这本书的图片？（文字不受影响）'))return;
   const keys=await dbKeys();
   for(const k of keys){if(String(k).startsWith(`img:${bookId}:`))await dbDel(k);}
+  renderBooks();
+}
+
+async function deleteBook(bookId){
+  const b=BOOKS_DATA.find(x=>x.id===bookId);
+  if(!confirm(`确认删除《${b?b.title:'这本书'}》？图片和文字都会删除。`))return;
+  // 删图片
+  const keys=await dbKeys();
+  for(const k of keys){if(String(k).startsWith(`img:${bookId}:`))await dbDel(k);}
+  // 删BOOKS_DATA
+  const idx=BOOKS_DATA.findIndex(x=>x.id===bookId);
+  if(idx>-1)BOOKS_DATA.splice(idx,1);
+  // 删localStorage里的用户书
+  let extras=ls('ra_user_books')||[];
+  extras=extras.filter(x=>x.id!==bookId);
+  lss('ra_user_books',extras);
+  // 删extra_books
+  let extra=ls('ra_extra_books')||{};
+  delete extra[bookId];
+  lss('ra_extra_books',extra);
   renderBooks();
 }
 
@@ -768,15 +789,14 @@ async function startBatchImport(input){
         const tc1=await pg1.getTextContent();
         const lines=tc1.items.map(it=>it.str.trim()).filter(Boolean);
         // 找第一条看起来像书名的行（不含网址、不含"Level"、不含"Word Count"、长度合理）
-        // 按Y坐标排序，取最顶部的文字作为书名
-        const itemsWithPos=tc1.items.filter(it=>it.str.trim().length>2);
-        itemsWithPos.sort((a,b)=>(b.transform[5]||0)-(a.transform[5]||0));
-        const topItems=itemsWithPos.slice(0,5).map(it=>it.str.trim());
-        const candidate=topItems.find(l=>
+        const candidate=lines.find(l=>
           l.length>2 && l.length<60 &&
           !l.includes('www.') &&
+          !l.toLowerCase().includes('level') &&
           !l.toLowerCase().includes('word count') &&
+          !l.toLowerCase().includes('reading a') &&
           !l.toLowerCase().includes('visit') &&
+          !l.toLowerCase().includes('benchmark') &&
           /[a-zA-Z]/.test(l)
         );
         if(candidate) title=candidate;
