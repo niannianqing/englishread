@@ -255,13 +255,36 @@ textarea{resize:vertical;min-height:80px}
       <div id="add-msg" style="font-size:13px;font-weight:700;margin-top:10px;min-height:18px"></div>
     </div>
 
-    <div class="card">
-      <div class="card-title">📋 批量导入</div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:8px">每行格式：<code>书名,系列,级别</code>（例：The Big Storm,RAZ,F）</div>
-      <textarea id="bulk-in" rows="6" placeholder="Henry and Mudge,RAZ,F&#10;Trucks,RAZ,G&#10;Gran,牛津树,F"></textarea>
-      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-        <button class="btn btn-primary" onclick="bulkImport()">批量导入</button>
-        <div id="bulk-msg" style="font-size:13px;font-weight:700;color:var(--green)"></div>
+    <div class="card" id="batch-card">
+      <div class="card-title">📦 批量导入 PDF</div>
+      <div class="alert alert-ok">💡 一次选多个 <code>_clr.pdf</code> 文件，自动识别书名和级别，逐本处理后统一保存。</div>
+
+      <div class="upload-zone" onclick="document.getElementById('batch-pdf-in').click()" style="margin-bottom:12px">
+        <input type="file" id="batch-pdf-in" accept=".pdf" multiple onchange="startBatchImport(this)">
+        <div style="font-size:36px;margin-bottom:8px">📚</div>
+        <div style="font-weight:800;font-size:15px">点击选择多个 _clr.pdf 文件</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px">自动识别书名、级别 · 逐本转图片 · 批量保存</div>
+      </div>
+
+      <!-- 批量进度 -->
+      <div id="batch-progress-wrap" style="display:none">
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px">
+          <span id="batch-book-label">准备中…</span>
+          <span id="batch-book-pct">0 / 0</span>
+        </div>
+        <div class="pbar"><div class="pbar-fill" id="batch-book-bar" style="width:0%;transition:width .4s"></div></div>
+        <div style="margin-top:6px">
+          <div class="pbar" style="height:4px;background:var(--border)"><div class="pbar-fill" id="batch-page-bar" style="width:0%;transition:width .2s;background:var(--green)"></div></div>
+          <div style="font-size:11px;color:var(--text2);margin-top:3px" id="batch-page-label">当前书页进度</div>
+        </div>
+
+        <!-- 待确认书单 -->
+        <div id="batch-book-list" style="margin-top:16px;display:flex;flex-direction:column;gap:8px"></div>
+        <div id="batch-done-msg" style="display:none;text-align:center;padding:16px">
+          <div style="font-size:32px">🎉</div>
+          <div style="font-weight:800;font-size:15px;margin-top:4px" id="batch-done-text"></div>
+          <button class="btn btn-primary" style="margin-top:12px" onclick="saveBatchBooks()">保存所有书到书库</button>
+        </div>
       </div>
     </div>
   </div>
@@ -633,20 +656,197 @@ function startEditBook(id){
   gotoPage('add-book');
 }
 
-function bulkImport(){
-  const lines=document.getElementById('bulk-in').value.trim().split('\n').filter(Boolean);
-  let n=0;
-  lines.forEach(ln=>{
-    const p=ln.split(',').map(s=>s.trim());
-    if(p.length<3)return;
-    const b={id:'bi_'+Date.now()+'_'+n,title:p[0],series:p[1],level:p[2],url:p[3]||'',note:p[4]||'',pages:[]};
-    BOOKS_DATA.push(b);
-    let ex=ls('ra_user_books')||[];ex.push(b);lss('ra_user_books',ex);
-    n++;
+// ══════════════════════════════════════════
+//  批量 PDF 导入
+// ══════════════════════════════════════════
+let batchQueue=[];   // 待处理文件列表
+let batchResults=[]; // 处理完成的书
+
+// 从文件名解析书名和级别
+// 例: raz_lg21_dogsally_clr.pdf → {level:'G', title:'Dog Sally'}
+function parseRazFilename(filename){
+  const lower=filename.toLowerCase().replace('.pdf','');
+
+  // 匹配级别: _la_, _lb_ ... _lz_ 或 _lg21_ 等
+  const levelMatch=lower.match(/_l([a-z])\d*_/);
+  const level=levelMatch?levelMatch[1].toUpperCase():'?';
+
+  // 提取书名slug: 在 _l??\d*_ 之后，_clr/_ds/_wl 之前
+  const slugMatch=lower.match(/_l[a-z]\d*_(.+?)(?:_clr|_ds|_wl|$)/);
+  const slug=slugMatch?slugMatch[1]:'';
+
+  // 分词：在小写→大写边界、数字边界处加空格，然后首字母大写
+  // dogsally → Dog Sally (按常见词表拆)
+  const title=splitSlug(slug);
+
+  return {level, title:title||filename};
+}
+
+// 贪心匹配常见英语词，把连续字母串拆开
+const WORD_LIST=['the','a','an','and','or','for','of','in','on','at','to','is','it',
+  'big','little','small','great','good','new','old','my','our','his','her','their',
+  'dog','dogs','cat','cats','fish','bird','birds','frog','frogs','bug','bugs','ant','bee','fox','pig','hen','cow','duck',
+  'boy','girl','mom','dad','man','woman','kid','baby','friend','family','families',
+  'red','blue','green','yellow','black','white','brown','pink','grey',
+  'run','jump','play','eat','see','go','come','look','help','make','take','give',
+  'day','night','sun','moon','star','rain','snow','wind','tree','farm','home','house','school',
+  'ball','book','hat','bag','box','cup','bed','car','bus','boat',
+  'sally','henry','mudge','sam','pat','jan','tim','max','rex','gran',
+  'one','two','three','four','five','six','seven','eight','nine','ten',
+  'can','has','had','did','got','let','put','say','said','come','went',
+  'up','down','out','off','back','away','here','there','where','when',
+  'happy','funny','silly','busy','lazy','tiny',
+  'animal','animals','water','flower','flowers','color','shape','shapes',
+  'night','nights','work','job','jobs','truck','trucks','soup','face','clown',
+  'storm','storms','baby','babies','grass','land','grassland','grasslands',
+  'ugly','duckling','robot','pirate','castle','adventure','dragon',
+  'mouse','making','going','riding','bike','ride','school','living','where','live','lives',
+  'do','did','does','what','who','how','why','which'];
+
+function splitSlug(slug){
+  if(!slug)return '';
+  // 先按数字分割，去掉纯数字片段
+  const parts=slug.split(/\d+/).filter(Boolean);
+  const words=[];
+  for(const part of parts){
+    words.push(...greedySplit(part));
+  }
+  return words.map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+}
+
+function greedySplit(str){
+  if(!str)return[];
+  // 尝试从头开始贪心匹配词表中的词
+  for(let len=Math.min(str.length,12);len>=2;len--){
+    const candidate=str.slice(0,len);
+    if(WORD_LIST.includes(candidate)){
+      const rest=greedySplit(str.slice(len));
+      return [candidate,...rest];
+    }
+  }
+  // 没匹配到，整体作为一个词
+  return [str];
+}
+
+async function startBatchImport(input){
+  const files=Array.from(input.files);
+  if(!files.length)return;
+
+  batchQueue=files;
+  batchResults=[];
+
+  document.getElementById('batch-progress-wrap').style.display='block';
+  document.getElementById('batch-done-msg').style.display='none';
+  document.getElementById('batch-book-list').innerHTML='';
+
+  const skipFront=2, skipBack=2; // RAZ默认跳过2页封面、2页封底
+
+  for(let fi=0;fi<files.length;fi++){
+    const file=files[fi];
+    const parsed=parseRazFilename(file.name);
+
+    document.getElementById('batch-book-label').textContent=`处理第 ${fi+1} 本：${parsed.title}`;
+    document.getElementById('batch-book-pct').textContent=`${fi+1} / ${files.length}`;
+    document.getElementById('batch-book-bar').style.width=((fi+1)/files.length*100)+'%';
+    document.getElementById('batch-page-label').textContent='读取中…';
+    document.getElementById('batch-page-bar').style.width='0%';
+
+    try{
+      const ab=await file.arrayBuffer();
+      const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+      const total=pdf.numPages;
+      const startPage=1+skipFront;
+      const endPage=Math.max(startPage,total-skipBack);
+      const contentPages=endPage-startPage+1;
+
+      const pages=[];
+      const offCanvas=document.createElement('canvas');
+      const ctx=offCanvas.getContext('2d');
+      const bookId='bi_'+Date.now()+'_'+fi;
+
+      // 先清旧pending
+      const oldKeys=await dbKeys();
+      for(const k of oldKeys){if(String(k).startsWith(`img:${bookId}:`))await dbDel(k);}
+
+      for(let i=startPage;i<=endPage;i++){
+        const pg=await pdf.getPage(i);
+        const idx=i-startPage;
+
+        // 文字
+        const tc=await pg.getTextContent();
+        pages.push(tc.items.map(it=>it.str).join(' ').trim());
+
+        // 图片
+        const vp=pg.getViewport({scale:1.5});
+        offCanvas.width=vp.width;offCanvas.height=vp.height;
+        await pg.render({canvasContext:ctx,viewport:vp}).promise;
+        const dataUrl=offCanvas.toDataURL('image/jpeg',0.85);
+        await dbSet(`img:${bookId}:${idx}`,dataUrl);
+
+        const pct=Math.round((idx+1)/contentPages*100);
+        document.getElementById('batch-page-bar').style.width=pct+'%';
+        document.getElementById('batch-page-label').textContent=`页面进度：${idx+1} / ${contentPages}`;
+        await new Promise(r=>setTimeout(r,0));
+      }
+
+      const book={
+        id:bookId,
+        title:parsed.title,
+        series:'RAZ',
+        level:parsed.level,
+        url:'',note:'',
+        pages
+      };
+      batchResults.push(book);
+
+      // 渲染已完成书目卡片（可修改书名）
+      const card=document.createElement('div');
+      card.style.cssText='background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px';
+      card.innerHTML=`
+        <span style="font-size:20px">✅</span>
+        <div style="flex:1">
+          <input id="btitle_${fi}" value="${parsed.title}" style="font-weight:800;font-size:14px;border:none;background:transparent;width:100%;color:var(--text1);font-family:var(--font)" placeholder="书名">
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">RAZ Level ${parsed.level} · ${contentPages}页图片 · ${pages.filter(p=>p.trim()).length}页文字</div>
+        </div>
+        <span class="pill pill-ok">Level ${parsed.level}</span>`;
+      document.getElementById('batch-book-list').appendChild(card);
+
+    }catch(e){
+      console.error('batch error',file.name,e);
+      const card=document.createElement('div');
+      card.style.cssText='background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:12px;font-size:13px;color:#991B1B';
+      card.textContent='❌ '+file.name+' 处理失败：'+e.message;
+      document.getElementById('batch-book-list').appendChild(card);
+    }
+  }
+
+  document.getElementById('batch-done-msg').style.display='block';
+  document.getElementById('batch-done-text').textContent=`${batchResults.length} 本书处理完成，确认书名后点保存`;
+}
+
+async function saveBatchBooks(){
+  // 读取用户可能修改过的书名
+  batchResults.forEach((book,fi)=>{
+    const inp=document.getElementById('btitle_'+fi);
+    if(inp)book.title=inp.value.trim()||book.title;
   });
-  document.getElementById('bulk-msg').textContent=`✓ 导入 ${n} 本`;
-  document.getElementById('bulk-in').value='';
-  setTimeout(()=>document.getElementById('bulk-msg').textContent='',3000);
+
+  let extras=ls('ra_user_books')||[];
+  for(const book of batchResults){
+    BOOKS_DATA.push(book);
+    extras.push(book);
+  }
+  lss('ra_user_books',extras);
+
+  document.getElementById('batch-done-msg').innerHTML=`<div style="font-size:32px">🎊</div><div style="font-weight:800;font-size:15px;margin-top:4px">已保存 ${batchResults.length} 本书到书库！</div>`;
+  document.getElementById('batch-pdf-in').value='';
+  batchResults=[];
+  updateStorageInfo();
+  setTimeout(()=>{
+    document.getElementById('batch-progress-wrap').style.display='none';
+    gotoPage('books');
+    renderBooks();
+  },2000);
 }
 
 // ── HISTORY ──
